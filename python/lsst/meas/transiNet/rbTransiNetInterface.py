@@ -3,8 +3,10 @@ import torch
 
 
 class rbTransiNetInterface:
-    ''' A class for interfacing between the LSST AP pipeline and
-    an rbTransiNet model. '''
+    '''
+    A class for interfacing between the LSST AP pipeline and
+    an rbTransiNet model.
+    '''
 
     def __init__(self, device='cpu'):
         self.model = rbTransiNetModel
@@ -20,9 +22,9 @@ class rbTransiNetInterface:
         self.model.eval()
 
     def prepare_input(self, x):
-        ''' 
-        Things like format conversion from afw.image.exposure to torch.tensor or
-        stacking-up of images can happen here.
+        '''
+        Things like format conversion from afw.image.exposure to torch.tensor
+        or stacking-up of images can happen here.
         '''
         x = x
         return x
