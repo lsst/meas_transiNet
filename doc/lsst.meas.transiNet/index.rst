@@ -6,6 +6,8 @@
 lsst.meas.transiNet
 ###################
 
+meas_transiNet provides a PipelineTask interface for the TransiNet machine learning real/bogus classification package.
+
 .. Paragraph that describes what this Python module does and links to related modules and frameworks.
 
 .. .. _lsst.meas.transiNet-using:
