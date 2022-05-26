@@ -23,7 +23,7 @@ from model import rbTransiNetModel
 import torch
 
 
-class rbTransiNetInterface:
+class RBTransiNetInterface:
     '''
     A class for interfacing between the LSST AP pipeline and
     an rbTransiNet model.
