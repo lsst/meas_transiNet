@@ -19,20 +19,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from model import rbTransiNetModel
+from model import dummyClassifier as RBTransiNetModel
 import torch
 
 
 class RBTransiNetInterface:
     """
     A class for interfacing between the LSST AP pipeline and
-    an rbTransiNet model.
+    an RBTransiNet model.
     """
 
     def __init__(self, device="cpu"):
         """Constructor"""
 
-        self.model = rbTransiNetModel
+        self.model = RBTransiNetModel
         self.device = device
 
     def init(self, pretrained_file):
