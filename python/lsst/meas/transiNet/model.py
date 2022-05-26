@@ -3,9 +3,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class rbTransiNetModel(nn.Module):
+class dummyClassifier(nn.Module):
+    """
+    A dummy classifier network for prototyping RBTransiNetInterface
+    and meas_transiNet.
+    """
     def __init__(self):
-        super(rbTransiNetModel, self).__init__()
+        """ Constructor
+        """
+        super(dummyClassifier, self).__init__()
 
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
@@ -15,6 +21,9 @@ class rbTransiNetModel(nn.Module):
         self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x):
+        """ Forward pass
+        The actual inference happens here.
+        """
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)
