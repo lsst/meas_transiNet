@@ -24,33 +24,45 @@ import torch
 
 
 class RBTransiNetInterface:
-    '''
+    """
     A class for interfacing between the LSST AP pipeline and
     an rbTransiNet model.
-    '''
+    """
 
-    def __init__(self, device='cpu'):
+    def __init__(self, device="cpu"):
+        """Constructor"""
+
         self.model = rbTransiNetModel
         self.device = device
 
     def init(self, pretrained_file):
+        """Deferred (manual) initialization.
+        Normally takes a long time. So better be called only once
+        and when there's time to wait!
+        """
 
         # --- Load pre-trained model from disk
         network_data = torch.load(pretrained_file, map_location=self.device)
-        self.model.load_state_dict(network_data['state_dict'], strict=True)
+        self.model.load_state_dict(network_data["state_dict"], strict=True)
 
         # --- put model in "eval" mode and stand by
         self.model.eval()
 
     def prepare_input(self, x):
-        '''
+        """
         Things like format conversion from afw.image.exposure to torch.tensor
         or stacking-up of images can happen here.
-        '''
+        """
         x = x
         return x
 
     def infer(self, x):
+        """Inference.
+        It is the most frequently used method. Receives one or a batch of
+        inputs, x, and returns corresponding scores.
+        x is a list. It is intentionally defined loosely and the exact
+        specifications of its contents are left for future versions.
+        """
 
         # --- Perform any required pre-processing and format conversion
         x = self.prepare_input(x)
