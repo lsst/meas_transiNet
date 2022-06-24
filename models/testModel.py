@@ -1,14 +1,18 @@
-__all__ = ["RealBogusModel"]
+__all__ = ["DummyClassifier"]
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 
-class RealBogusModel(nn.Module):
-    """A trivial pytorch model for testing the interface.
+class DummyClassifier(nn.Module):
+    """
+    A dummy classifier network for prototyping RBTransiNetInterface
+    and meas_transiNet.
     """
     def __init__(self):
+        """ Constructor
+        """
         super().__init__()
 
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
@@ -19,6 +23,9 @@ class RealBogusModel(nn.Module):
         self.fc2 = nn.Linear(128, 1)
 
     def forward(self, x):
+        """ Forward pass
+        The actual inference happens here.
+        """
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)

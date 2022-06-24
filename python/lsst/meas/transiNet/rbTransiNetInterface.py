@@ -41,10 +41,11 @@ class CutoutInputs:
 
 class RBTransiNetInterface:
     """
-    The interface between the LSST AP pipeline and a trained pytorch-based
-    RBTransiNet neural network model.
+    A class for interfacing between the LSST AP pipeline and
+    an RBTransiNet model.
     """
     def __init__(self, model, pretrained_file=None, device='cpu'):
+        """Constructor"""
         self.model = model
         self.device = device
         self.init(pretrained_file)
@@ -52,22 +53,26 @@ class RBTransiNetInterface:
     def init(self, pretrained_file):
         """Deferred (manual) initialization.
 
-        Model initialization from a pretrained file can be slow.
+        Normally takes a long time. So better be called only once
+		and when there's time to wait!
 
         Parameters
         ----------
         pretrained_file : `str`
             Path to the trained model.
         """
-        network_data = torch.load(pretrained_file, map_location=self.device)
-        self.model.load_state_dict(network_data['state_dict'])
 
-        # Put the model in evaluation mode instead of training model.
+        # --- Load pre-trained model from disk
+        network_data = torch.load(pretrained_file, map_location=self.device)
+        self.model.load_state_dict(network_data["state_dict"], strict=True)
+
+        # --- put model in "eval" mode and stand by
         self.model.eval()
 
     def prepare_input(self, inputs):
         """
-        Convert inputs from numpy arrays, etc. to a torch.tensor blob.
+        Things like format conversion from afw.image.exposure to torch.tensor
+        or stacking-up of images can happen here.
 
         Parameters
         ----------
@@ -77,7 +82,7 @@ class RBTransiNetInterface:
         Returns
         -------
         blob
-            Prepared torch tensor blob to run the model on.
+            Prepared torch tensor blob to be passed to the network
         """
 
         if len(inputs) > 1:
@@ -90,7 +95,12 @@ class RBTransiNetInterface:
         return blob, labels
 
     def infer(self, inputs):
-        """Return the score of this cutout.
+    	"""Inference.
+        It is the most frequently used method. Receives one or a batch of
+        inputs, x, and returns corresponding scores.
+        x is a list. It is intentionally defined loosely and the exact
+        specifications of its contents are left for future versions.
+        """
 
         Parameters
         ----------
@@ -102,8 +112,10 @@ class RBTransiNetInterface:
         scores : `numpy.array`
             Float scores for each element of ``inputs``.
         """
+
+        # --- Perform any required pre-processing and format conversion
         blob, labels = self.prepare_input(inputs)
-        result = self.model(blob)
-        scores = result.to_numpy()
+        scores_ = self.model(blob)
+        scores = result.detach().to_npy()
 
         return scores
