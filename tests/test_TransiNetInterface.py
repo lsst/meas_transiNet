@@ -24,13 +24,13 @@ import unittest
 
 import numpy as np
 
-from lsst.meas.transiNet.transiNetTask import _import_model
+from lsst.meas.transiNet import utils
 from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 
 class TestOneCutout(unittest.TestCase):
     def setUp(self):
-        module = _import_model("testModel")
+        module = utils.import_model("testModel")
         torch_data = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/checkpoint.pth.zip")
         self.interface = RBTransiNetInterface(module.RealBogusModel(), torch_data)
 
