@@ -19,55 +19,84 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from model import dummyClassifier as RBTransiNetModel
+__all__ = ["RBTransiNetInterface", "CutoutInputs"]
+
+import numpy as np
+
+import dataclasses
 import torch
+
+
+@dataclasses.dataclass(frozen=True, kw_only=True)
+class CutoutInputs:
+    """Science/template/difference cutouts of a single object plus other
+    metadata to be processed and put into a pytorch tensor object
+    """
+    science: np.ndarray
+    template: np.ndarray
+    difference: np.ndarray
+
+    label: bool = None
+    """Known truth of whether this is a real or bogus object."""
 
 
 class RBTransiNetInterface:
     """
-    A class for interfacing between the LSST AP pipeline and
-    an RBTransiNet model.
+    The interface between the LSST AP pipeline and a trained pytorch-based
+    RBTransiNet neural network model.
     """
-
-    def __init__(self, device="cpu"):
-        """Constructor"""
-
-        self.model = RBTransiNetModel
+    def __init__(self, model, pretrained_file=None, device='cpu'):
+        self.model = model
         self.device = device
+        self.init(pretrained_file)
 
     def init(self, pretrained_file):
         """Deferred (manual) initialization.
-        Normally takes a long time. So better be called only once
-        and when there's time to wait!
+
+        Model initialization from a pretrained file can be slow.
+
+        Parameters
+        ----------
+        pretrained_file : `str`
+            Path to the trained model.
         """
-
-        # --- Load pre-trained model from disk
         network_data = torch.load(pretrained_file, map_location=self.device)
-        self.model.load_state_dict(network_data["state_dict"], strict=True)
+        self.model.load_state_dict(network_data['state_dict'], strict=True)
 
-        # --- put model in "eval" mode and stand by
+        # Put the model in evaluation mode instead of training model.
         self.model.eval()
 
-    def prepare_input(self, x):
+    def prepare_input(self, inputs):
         """
-        Things like format conversion from afw.image.exposure to torch.tensor
-        or stacking-up of images can happen here.
+        Convert inputs from numpy arrays, etc. to a torch.tensor blob.
+
+        Parameters
+        ----------
+        inputs : `list` [`CutoutInputs`]
+            Inputs to be scored.
+
+        Returns
+        -------
+        blob
+            Prepared torch tensor blob to run the model on.
         """
-        x = x
-        return x
+        raise NotImplementedError
 
-    def infer(self, x):
-        """Inference.
-        It is the most frequently used method. Receives one or a batch of
-        inputs, x, and returns corresponding scores.
-        x is a list. It is intentionally defined loosely and the exact
-        specifications of its contents are left for future versions.
+    def infer(self, inputs):
+        """Return the score of this cutout.
+
+        Parameters
+        ----------
+        inputs : `list` [`CutoutInputs`]
+            Inputs to be scored.
+
+        Returns
+        -------
+        scores : `numpy.array`
+            Float scores for each element of ``inputs``.
         """
+        blob, labels = self.prepare_input(inputs)
+        result = self.model(blob)
+        scores = result.to_numpy()
 
-        # --- Perform any required pre-processing and format conversion
-        x = self.prepare_input(x)
-
-        # --- Feed input to the network and get a score
-        score = self.model(x)
-
-        return score
+        return scores
