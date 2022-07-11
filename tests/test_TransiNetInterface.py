@@ -37,8 +37,8 @@ class TestOneCutout(unittest.TestCase):
     def test_infer_empty(self):
         """Test running infer on images containing all zeros.
         """
-        data = np.zeros((20, 20))
+        data = np.zeros((256, 256), dtype=np.single)
         inputs = CutoutInputs(science=data, difference=data, template=data)
         result = self.interface.infer([inputs])
-        # TODO: I think this should return a score of identically zero?
-        self.assertEqual(result, [0])
+        self.assertTupleEqual(result.shape, (1, 1))  # Result is an array, even if we pass a signle sample
+        self.assertAlmostEqual(result[0][0], 0.5011908)  # Empricial meaningless value spit by this very model
