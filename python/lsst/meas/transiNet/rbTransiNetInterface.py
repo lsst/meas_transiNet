@@ -30,7 +30,7 @@ import torch
 @dataclasses.dataclass(frozen=True, kw_only=True)
 class CutoutInputs:
     """Science/template/difference cutouts of a single object plus other
-    metadata to be processed and put into a pytorch tensor object
+    metadata.
     """
     science: np.ndarray
     template: np.ndarray
@@ -79,6 +79,8 @@ class RBTransiNetInterface:
         -------
         blob
             Prepared torch tensor blob to run the model on.
+        labels
+            Truth labels, concatenated into a single list.
         """
         raise NotImplementedError
 
