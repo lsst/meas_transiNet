@@ -45,6 +45,7 @@ class RBTransiNetInterface:
     The interface between the LSST AP pipeline and a trained pytorch-based
     RBTransiNet neural network model.
     """
+
     def __init__(self, model, pretrained_file=None, device='cpu'):
         self.model = model
         self.device = device
@@ -82,7 +83,24 @@ class RBTransiNetInterface:
         labels
             Truth labels, concatenated into a single list.
         """
-        raise NotImplementedError
+        cutoutsList = []
+        labelsList = []
+        for inp in inputs:
+            # Convert each cutout to a torch tensor
+            template = torch.from_numpy(inp.template)
+            science = torch.from_numpy(inp.science)
+            difference = torch.from_numpy(inp.difference)
+
+            # Stack the components to create a single blob
+            singleBlob = torch.stack((template, science, difference), dim=0)
+
+            # And append them to the temporary list
+            cutoutsList.append(singleBlob)
+
+            labelsList.append(inp.label)
+
+        torchBlob = torch.stack(cutoutsList)
+        return torchBlob, labelsList
 
     def infer(self, inputs):
         """Return the score of this cutout.
@@ -99,6 +117,7 @@ class RBTransiNetInterface:
         """
         blob, labels = self.prepare_input(inputs)
         result = self.model(blob)
-        scores = result.to_numpy()
+        scores = torch.sigmoid(result)
+        npyScores = scores.detach().numpy()
 
-        return scores
+        return npyScores
