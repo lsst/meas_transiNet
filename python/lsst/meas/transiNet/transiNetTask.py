@@ -64,8 +64,8 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         doc="Catalog of real/bogus classifications for each diaSource, "
             "element-wise aligned with diaSources.",
         dimensions=("instrument", "visit", "detector"),
-        storageClass="BaseCatalog",
-        name="{fakesType}{coaddName}realBogusSrc",
+        storageClass="Catalog",
+        name="{fakesType}{coaddName}RealBogusSources",
     )
 
 
