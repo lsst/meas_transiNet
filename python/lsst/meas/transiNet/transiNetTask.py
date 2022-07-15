@@ -87,7 +87,7 @@ class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=Tra
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
         doc="Width/height of square cutouts to send to classifier.",
-        default=40
+        default=256,
     )
 
 
