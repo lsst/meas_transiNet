@@ -115,7 +115,7 @@ class TransiNetTask(lsst.pipe.base.PipelineTask):
         classifications.resize(len(scores))
 
         classifications["id"] = diaSources["id"]
-        classifications["score"] = scores
+        classifications["score"] = scores.ravel()
 
         return lsst.pipe.base.Struct(classifications=classifications)
 
