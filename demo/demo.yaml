@@ -1,0 +1,21 @@
+description: A minimal pipeline for demonstrating the usage of (rb)TransiNetTask on DC2 data
+
+instrument: lsst.obs.lsst.LsstCamImSim
+imports:
+  - location: $AP_PIPE_DIR/pipelines/LsstCamImSim/ApPipe.yaml
+    exclude:  
+      - isr
+      - characterizeImage
+      - calibrate
+      - retrieveTemplate
+      - imageDifference
+      - transformDiaSrcCat
+      - diaPipe
+   
+tasks:
+  rbClassify:
+    class: lsst.meas.transiNet.TransiNetTask
+    config:
+      modelFile: testModel
+      weightsFile: '../tests/data/checkpoint.pth.zip'
+      connections.coaddName: 'goodSeeing'
