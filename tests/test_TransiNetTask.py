@@ -39,6 +39,7 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         # TODO: make one of these centered in a different corner of the pixel,
         # to test that the cutout is properly centered.
         dataset.addSource(10000, Point2D(100, 50.))
+        dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
         torch_data = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/checkpoint.pth.zip")
@@ -53,6 +54,11 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
             self._check_cutout(result.science, task.config.cutoutSize)
             self._check_cutout(result.template, task.config.cutoutSize)
             self._check_cutout(result.difference, task.config.cutoutSize)
+
+            if record.getX() == 1 and record.getY() == 1:  # This is the "border"-source
+                self._check_empty_cutout(result.science)
+                self._check_empty_cutout(result.template)
+                self._check_empty_cutout(result.difference)
 
     def _check_cutout(self, image, size):
         """Test that the image cutout was made correctly.
@@ -71,11 +77,21 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         # centroid is. We can assume Box2I.makeCenteredBox works correctly...
         self.assertEqual(max_index, ((size/2)-1, (size/2)-1))
 
+    def _check_empty_cutout(self, cutout):
+        """Test that the cutout is empty.
+
+        Parameters
+        ----------
+        cutout : `np.ndarray` (N, 2)
+            Square cutout made from image.
+        """
+        np.testing.assert_array_equal(cutout, np.zeros_like(cutout))
+
     def test_run(self):
         """Test that run passes an appropriate object to the interface,
         mocking the interface infer step so we don't need to use pytorch.
         """
-        scores = np.array([0.0, 1.0])
+        scores = np.array([0.0, 1.0, 0.0])
         task = TransiNetTask(config=self.config)
         task.interface.infer = unittest.mock.Mock(task.interface.infer)
         with unittest.mock.patch.object(task.interface, "infer") as mock_infer:
