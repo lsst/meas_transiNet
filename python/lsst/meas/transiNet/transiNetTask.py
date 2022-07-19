@@ -24,6 +24,7 @@ __all__ = ["TransiNetTask", "TransiNetConfig"]
 import lsst.geom
 import lsst.pex.config
 import lsst.pipe.base
+import numpy as np
 
 from . import utils
 from . import rbTransiNetInterface
@@ -64,8 +65,8 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         doc="Catalog of real/bogus classifications for each diaSource, "
             "element-wise aligned with diaSources.",
         dimensions=("instrument", "visit", "detector"),
-        storageClass="BaseCatalog",
-        name="{fakesType}{coaddName}realBogusSrc",
+        storageClass="Catalog",
+        name="{fakesType}{coaddName}RealBogusSources",
     )
 
 
@@ -86,7 +87,7 @@ class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=Tra
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
         doc="Width/height of square cutouts to send to classifier.",
-        default=40
+        default=256,
     )
 
 
@@ -135,8 +136,21 @@ class TransiNetTask(lsst.pipe.base.PipelineTask):
         cutouts, `lsst.meas.transiNet.CutoutInputs`
             Cutouts of each of the input images.
         """
+
+        # Try to create cutouts, or simply return empty cutouts if
+        # failed (most probably out-of-border box)
         extent = lsst.geom.Extent2I(self.config.cutoutSize)
         box = lsst.geom.Box2I.makeCenteredBox(source.getCentroid(), extent)
-        return rbTransiNetInterface.CutoutInputs(science=science.Factory(science, box).image.array,
-                                                 template=template.Factory(template, box).image.array,
-                                                 difference=difference.Factory(difference, box).image.array)
+
+        if science.getBBox().contains(box):
+            science_cutout = science.Factory(science, box).image.array
+            template_cutout = template.Factory(template, box).image.array
+            difference_cutout = difference.Factory(difference, box).image.array
+        else:
+            science_cutout = np.zeros((self.config.cutoutSize, self.config.cutoutSize), dtype=np.float32)
+            template_cutout = np.zeros_like(science_cutout)
+            difference_cutout = np.zeros_like(science_cutout)
+
+        return rbTransiNetInterface.CutoutInputs(science=science_cutout,
+                                                 template=template_cutout,
+                                                 difference=difference_cutout)
