@@ -118,6 +118,6 @@ class RBTransiNetInterface:
         blob, labels = self.prepare_input(inputs)
         result = self.model(blob)
         scores = torch.sigmoid(result)
-        npyScores = scores.detach().numpy()
+        npyScores = scores.detach().numpy().ravel()
 
         return npyScores
