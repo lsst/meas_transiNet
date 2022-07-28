@@ -8,7 +8,8 @@ imports:
       - characterizeImage
       - calibrate
       - retrieveTemplate
-      - imageDifference
+      - subtractImages
+      - detectAndMeasure
       - transformDiaSrcCat
       - diaPipe
    
