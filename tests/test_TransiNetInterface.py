@@ -42,3 +42,20 @@ class TestOneCutout(unittest.TestCase):
         result = self.interface.infer([inputs])
         self.assertTupleEqual(result.shape, (1,))
         self.assertAlmostEqual(result[0], 0.5011908)  # Empricial meaningless value spit by this very model
+
+
+class TestOneCutoutResnet(unittest.TestCase):
+    def setUp(self):
+        model = utils.import_model("rbResnet50")
+        torch_data = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                  "../pretrained/resnet50-12a-epoch0000087_iter0200000.pth.tar")
+        self.interface = RBTransiNetInterface(model(), torch_data)
+
+    def test_infer_empty(self):
+        """Test running infer on images containing all zeros.
+        """
+        data = np.zeros((256, 256), dtype=np.single)
+        inputs = CutoutInputs(science=data, difference=data, template=data)
+        result = self.interface.infer([inputs])
+        self.assertTupleEqual(result.shape, (1,))
+        self.assertAlmostEqual(result[0], 0.00042127)  # Empricial meaningless value spit by this very model
