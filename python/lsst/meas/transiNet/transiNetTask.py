@@ -73,10 +73,11 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
 class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=TransiNetConnections):
     modelFile = lsst.pex.config.ChoiceField(
         dtype=str,
-        doc="TransiNet model to load. This is the name of a python file in the models/ "
+        doc="rbTransiNet model to load. This is the name of a python file in the models/ "
             "directory that contains a single class that is a subclass of `torch.nn.Module`.",
         allowed={
             "testModel": "A very basic model, for testing the task and interface.",
+            "rbResnet50": "A wrapper around the resnet50 architecture, with minor modifications.",
         }
     )
     weightsFile = lsst.pex.config.Field(
