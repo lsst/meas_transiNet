@@ -25,6 +25,7 @@ import numpy as np
 
 import dataclasses
 import torch
+import nnModelPackage
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -46,23 +47,17 @@ class RBTransiNetInterface:
     RBTransiNet neural network model.
     """
 
-    def __init__(self, model, pretrained_file=None, device='cpu'):
-        self.model = model
+    def __init__(self, model_package_name='file:///../../../../model_packages/dummy', device='cpu'):
+        self.model_package_name = model_package_name
         self.device = device
-        self.init(pretrained_file)
+        self.init_model()
 
-    def init(self, pretrained_file):
-        """Deferred (manual) initialization.
-
-        Model initialization from a pretrained file can be slow.
-
-        Parameters
-        ----------
-        pretrained_file : `str`
-            Path to the trained model.
+    def init_model(self):
+        """Create and initialize an NN model
         """
-        network_data = torch.load(pretrained_file, map_location=self.device)
-        self.model.load_state_dict(network_data['state_dict'], strict=True)
+
+        model_package = nnModelPackage.NNModelPackage(self.model_package_name, self.device)
+        self.model = model_package.load()
 
         # Put the model in evaluation mode instead of training model.
         self.model.eval()
