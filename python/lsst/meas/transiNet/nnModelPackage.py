@@ -96,15 +96,16 @@ class NNModelPackage:
         # Create a proper adapter based on the storage mode
         if storage_mode == PackageStorageMode.local:
             adapter = NNModelPackageAdapterLocal(self.model_package_name)
-        elif storage_mode == PackageStorageMode.local:
+        elif storage_mode == PackageStorageMode.neighbor:
             adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
+        else:
+            raise NotImplementedError
 
         # Load various components based on the storage mode
-        self.model_filename, self.weights_filename = adapter.fetch()
+        model = adapter.load_model()
+        network_data = adapter.load_weights(device)
 
-        model = load_model()
-        network_data = load_weights(device)
-        self.model.load_state_dict(network_data['state_dict'], strict=True)
+        # Load pretrained weights into model
+        model.load_state_dict(network_data['state_dict'], strict=True)
 
         return model
-        network_data = torch.load(pretrained_file, map_location=device)
