@@ -95,8 +95,10 @@ class NNModelPackage:
         # Create a proper adapter based on the storage mode
         if storage_mode == PackageStorageMode.local:
             adapter = NNModelPackageAdapterLocal(self.model_package_name)
-        elif storage_mode == PackageStorageMode.local:
+        elif storage_mode == PackageStorageMode.neighbor:
             adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
+        else:
+            raise NotImplementedError
 
         # Load various components based on the storage mode
         model = adapter.load_model()
