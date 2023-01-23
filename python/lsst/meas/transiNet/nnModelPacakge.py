@@ -24,7 +24,7 @@ __all__ = ["NNModelPackage"]
 import enum
 import torch
 
-PackageStorageLocation = enum.Enum('PackageStorageLocation', ['local', 'neighbor'])  # ,'butler', ...
+PackageStorageMode = enum.Enum('PackageStorageMode', ['local', 'neighbor'])  # ,'butler', ...
 
 
 class NNModelPackage:
@@ -40,9 +40,9 @@ class NNModelPackage:
     def __init__(self, model_package_name):
         pass
 
-    def storage_location_from_path(self, path):
-        """Infer (decode!) storage location from path string.
-        The storage location is assumed to be encoded in the
+    def storage_mode_from_path(self, path):
+        """Infer (decode!) storage mode from path string.
+        The storage mode is assumed to be encoded in the
         path name e.g as "file:///" for local storage or
         "neighbor:///" for neighbor data repository.
 
@@ -54,28 +54,28 @@ class NNModelPackage:
 
         Returns
         -------
-        storage_location :
-            Package storage location
+        storage_mode :
+            Package storage mode
 
         """
 
-        storage_location = None  # TODO: replace with proper error handling by adding an 'else' below
+        storage_mode = None  # TODO: replace with proper error handling by adding an 'else' below
 
         try:  # To catch non-standard paths
             token = path.split(':///')[0]
             if token.lower() == 'file':
-                storage_location = PackageStorageLocation.local
+                storage_mode = PackageStorageMode.local
             elif token.lower() == 'neighbor':
-                storage_location = PackageStorageLocation.neighbor
+                storage_mode = PackageStorageMode.neighbor
 
         except Exception:
             pass  # TODO: replace with proper error handling
 
-        return storage_location
+        return storage_mode
 
     def load(self, device):
         """Load model architecture and pretrained weights.
-        This method handles all different locations of storages.
+        This method handles all different modes of storages.
 
 
         Parameters
