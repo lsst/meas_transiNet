@@ -38,7 +38,7 @@ class NNModelPackage:
     """
 
     def __init__(self, model_package_name):
-        pass
+        self.model_package_name = model_package_name
 
     def storage_mode_from_path(self, path):
         """Infer (decode!) storage mode from path string.
@@ -58,7 +58,6 @@ class NNModelPackage:
             Package storage mode
 
         """
-
         storage_mode = None  # TODO: replace with proper error handling by adding an 'else' below
 
         try:  # To catch non-standard paths
@@ -91,5 +90,21 @@ class NNModelPackage:
             the architecture module.
         """
 
-        network_data = torch.load(pretrained_file, map_location=device)
+        # Parse storage mode out of the provided package name
+        self.storage_mode = self.storage_mode_from_path(self.model_package_name)
+
+        # Create a proper adapter based on the storage mode
+        if storage_mode == PackageStorageMode.local:
+            adapter = NNModelPackageAdapterLocal(self.model_package_name)
+        elif storage_mode == PackageStorageMode.local:
+            adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
+
+        # Load various components based on the storage mode
+        self.model_filename, self.weights_filename = adapter.fetch()
+
+        model = load_model()
+        network_data = load_weights(device)
         self.model.load_state_dict(network_data['state_dict'], strict=True)
+
+        return model
+        network_data = torch.load(pretrained_file, map_location=device)
