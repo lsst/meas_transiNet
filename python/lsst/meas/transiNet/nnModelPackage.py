@@ -99,11 +99,10 @@ class NNModelPackage:
             adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
 
         # Load various components based on the storage mode
-        self.model_filename, self.weights_filename = adapter.fetch()
+        model = adapter.load_model()
+        network_data = adapter.load_weights(device)
 
-        model = load_model()
-        network_data = load_weights(device)
-        self.model.load_state_dict(network_data['state_dict'], strict=True)
+        # Load pretrained weights into model
+        model.load_state_dict(network_data['state_dict'], strict=True)
 
         return model
-        network_data = torch.load(pretrained_file, map_location=device)
