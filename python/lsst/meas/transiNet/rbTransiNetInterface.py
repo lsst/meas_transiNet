@@ -22,10 +22,10 @@
 __all__ = ["RBTransiNetInterface", "CutoutInputs"]
 
 import numpy as np
-
 import dataclasses
 import torch
-import nnModelPackage
+
+from .nnModelPackage import NNModelPackage
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
@@ -55,9 +55,8 @@ class RBTransiNetInterface:
     def init_model(self):
         """Create and initialize an NN model
         """
-
-        model_package = nnModelPackage.NNModelPackage(self.model_package_name, self.device)
-        self.model = model_package.load()
+        model_package = NNModelPackage(self.model_package_name)
+        self.model = model_package.load(self.device)
 
         # Put the model in evaluation mode instead of training model.
         self.model.eval()

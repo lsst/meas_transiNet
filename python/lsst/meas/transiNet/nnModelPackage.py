@@ -22,7 +22,9 @@
 __all__ = ["NNModelPackage"]
 
 import enum
-import torch
+
+from .nnModelPackageAdapterLocal import NNModelPackageAdapterLocal
+from .nnModelPackageAdapterNeighbor import NNModelPackageAdapterNeighbor
 
 PackageStorageMode = enum.Enum('PackageStorageMode', ['local', 'neighbor'])  # ,'butler', ...
 
