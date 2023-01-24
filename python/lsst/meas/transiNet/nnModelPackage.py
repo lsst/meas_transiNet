@@ -22,7 +22,9 @@
 __all__ = ["NNModelPackage"]
 
 import enum
-import torch
+
+from .nnModelPackageAdapterLocal import NNModelPackageAdapterLocal
+from .nnModelPackageAdapterNeighbor import NNModelPackageAdapterNeighbor
 
 PackageStorageMode = enum.Enum('PackageStorageMode', ['local', 'neighbor'])  # ,'butler', ...
 
@@ -94,9 +96,9 @@ class NNModelPackage:
         self.storage_mode = self.storage_mode_from_path(self.model_package_name)
 
         # Create a proper adapter based on the storage mode
-        if storage_mode == PackageStorageMode.local:
+        if self.storage_mode == PackageStorageMode.local:
             adapter = NNModelPackageAdapterLocal(self.model_package_name)
-        elif storage_mode == PackageStorageMode.neighbor:
+        elif self.storage_mode == PackageStorageMode.neighbor:
             adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
         else:
             raise NotImplementedError
