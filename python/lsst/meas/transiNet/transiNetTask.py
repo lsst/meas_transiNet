@@ -26,7 +26,6 @@ import lsst.pex.config
 import lsst.pipe.base
 import numpy as np
 
-from . import utils
 from . import rbTransiNetInterface
 
 
@@ -71,19 +70,10 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
 
 
 class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=TransiNetConnections):
-    modelFile = lsst.pex.config.ChoiceField(
+    modelPackageName = lsst.pex.config.Field(
         dtype=str,
-        doc="rbTransiNet model to load. This is the name of a python file in the models/ "
-            "directory that contains a single class that is a subclass of `torch.nn.Module`.",
-        allowed={
-            "testModel": "A very basic model, for testing the task and interface.",
-            "rbResnet50": "A wrapper around the resnet50 architecture, with minor modifications.",
-        }
-    )
-    weightsFile = lsst.pex.config.Field(
-        dtype=str,
-        doc="Absolute path to pytorch weights file to load at init.",
-        deprecated="This config is a placeholder while we sort out how to store and load large weight files."
+        doc=("A path-like identifier of a model package. Currently supports the two modes: "
+             "local:/// and neighbor:///")
     )
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
@@ -102,8 +92,7 @@ class TransiNetTask(lsst.pipe.base.PipelineTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        model = utils.import_model(self.config.modelFile)
-        self.interface = rbTransiNetInterface.RBTransiNetInterface(model(), self.config.weightsFile)
+        self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName)
 
     def run(self, template, science, difference, diaSources):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
