@@ -19,7 +19,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os.path
 import unittest
 import numpy as np
 
@@ -42,10 +41,8 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
-        torch_data = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/checkpoint.pth.zip")
         self.config = TransiNetTask.ConfigClass()
-        self.config.modelFile = "testModel"
-        self.config.weightsFile = torch_data
+        self.config.modelPackageName = "local:///dummy"
 
     def test_make_cutouts(self):
         task = TransiNetTask(config=self.config)
