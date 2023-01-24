@@ -1,15 +1,20 @@
-import nnModelPackageAdapterBase
-import utils
+import os
+import torch
+
+from .nnModelPackageAdapterBase import NNModelPackageAdapterBase
+from . import utils
+
+__all__ = ["NNModelPackageAdapterLocal"]
 
 
-class NNModelPackageAdapterLocal(nnModelPackageAdapterBase.NNModelPackageAdapterBase):
+class NNModelPackageAdapterLocal(NNModelPackageAdapterBase):
     """
     An adapter class for interfacing with ModelPackages stored in
     'local' mode: those of which both the code and pretrained weights
     reside in the same Git repository as that of rbTransiNetInterface
     """
     def __init__(self, model_package_name):
-        super().__init__(self, model_package_name)
+        super().__init__(model_package_name)
 
         self.fetch()
         self.model_filename, self.checkpoint_filename = self.get_filenames()
@@ -29,8 +34,11 @@ class NNModelPackageAdapterLocal(nnModelPackageAdapterBase.NNModelPackageAdapter
         checkpoint_filename : string
 
         """
-        model_filename = ...
-        checkpoint_filename = ...
+        dir_name = os.path.join(os.getenv('MEAS_TRANSINET_DIR'),
+                                "model_packages",
+                                self.model_package_name.split(':///')[1])
+        model_filename = os.path.join(dir_name, 'model.py')  # For now assume fixed filenames
+        checkpoint_filename = os.path.join(dir_name, 'checkpoint.pth.tar')  # For now assume fixed filenames
 
         return model_filename, checkpoint_filename
 
@@ -49,8 +57,8 @@ class NNModelPackageAdapterLocal(nnModelPackageAdapterBase.NNModelPackageAdapter
 
         model = utils.import_model(self.model_filename)
         return model
-        
-    def load_weights(self):
+
+    def load_weights(self, device):
         """
         Load and return a network checkpoint
 
@@ -62,5 +70,5 @@ class NNModelPackageAdapterLocal(nnModelPackageAdapterBase.NNModelPackageAdapter
         network_data : dict
         """
 
-        network_data = torch.load(pretrained_file, map_location=device)
+        network_data = torch.load(self.checkpoint_filename, map_location=device)
         return network_data
