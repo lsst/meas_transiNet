@@ -36,9 +36,9 @@ class NNModelPackageAdapterBase(abc.ABC):
         -------
         model : unknown subclass of nn.Module
         """
-        
+
     @abc.abstractmethod
-    def load_weights(self):
+    def load_weights(self, device):
         """
         Load and return a network checkpoint
 
@@ -49,4 +49,3 @@ class NNModelPackageAdapterBase(abc.ABC):
         -------
         network_data : dict
         """
-        
