@@ -1,7 +1,7 @@
 import abc
 
 
-class NNModelPackageAdapterBase(abc.ABC):
+class NNModelPackageAdapterNeighbor(abc.ABC):
     """
     Abstract base class for NNModelPackageAdapter* adapters
     """
