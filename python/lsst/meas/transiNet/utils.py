@@ -49,7 +49,7 @@ def import_model(name):
         Raised if a valid pytorch model cannot be found in loaded module.
     """
     model_dir = os.path.join(lsst.utils.getPackageDir("meas_transiNet"), "models")
-    model_path = os.path.join(model_dir, f"{name}.py")
+    model_path = os.path.join(model_dir, name)
     spec = importlib.util.spec_from_file_location(name, model_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
