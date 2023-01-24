@@ -22,37 +22,30 @@
 __all__ = ["import_model"]
 
 import importlib
-import os.path
-import sys
 
 import torch.nn
 
-import lsst.utils
 
-
-def import_model(name):
-    """Import a model from the models directory and return the class object.
+def import_model(path):
+    """Import a model from the specified path and return the class object.
 
     Parameters
     ----------
-    name : `str`
-        Name of the model file to be loaded.
+    path : `str`
+        Path to the model file.
 
     Returns
     -------
-    model_class : `type`
-        Model class to instantiate; a subclass of `torch.nn.Module`.
+    model : `torch.nn.Module`
+        The model class object.
 
     Raises
     ------
     ImportError
         Raised if a valid pytorch model cannot be found in loaded module.
     """
-    model_dir = os.path.join(lsst.utils.getPackageDir("meas_transiNet"), "models")
-    model_path = os.path.join(model_dir, f"{name}.py")
-    spec = importlib.util.spec_from_file_location(name, model_path)
+    spec = importlib.util.spec_from_file_location('model', path)
     module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module
     spec.loader.exec_module(module)
 
     if len(module.__all__) != 1:
