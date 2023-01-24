@@ -43,7 +43,7 @@ class NNModelPackage:
     def storage_mode_from_path(self, path):
         """Infer (decode!) storage mode from path string.
         The storage mode is assumed to be encoded in the
-        path name e.g as "file:///" for local storage or
+        path name e.g as "local:///" for local storage or
         "neighbor:///" for neighbor data repository.
 
         Parameters
@@ -62,7 +62,7 @@ class NNModelPackage:
 
         try:  # To catch non-standard paths
             token = path.split(':///')[0]
-            if token.lower() == 'file':
+            if token.lower() == 'local':
                 storage_mode = PackageStorageMode.local
             elif token.lower() == 'neighbor':
                 storage_mode = PackageStorageMode.neighbor
