@@ -55,4 +55,4 @@ def import_model(path):
     if torch.nn.Module not in model.__bases__:
         raise ImportError(f"Loaded class {model}, from {module}, is not a pytorch neural network module.")
 
-    return model
+    return model()
