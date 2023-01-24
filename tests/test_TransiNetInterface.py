@@ -19,20 +19,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os.path
 import unittest
 
 import numpy as np
 
-from lsst.meas.transiNet import utils
 from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 
 class TestOneCutout(unittest.TestCase):
     def setUp(self):
-        model = utils.import_model("testModel")
-        torch_data = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data/checkpoint.pth.zip")
-        self.interface = RBTransiNetInterface(model(), torch_data)
+        model_package_name = 'local:///dummy'
+        self.interface = RBTransiNetInterface(model_package_name)
 
     def test_infer_empty(self):
         """Test running infer on images containing all zeros.
