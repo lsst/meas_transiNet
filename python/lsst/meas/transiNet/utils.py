@@ -36,7 +36,7 @@ def import_model(name):
     Parameters
     ----------
     name : `str`
-        Name of the model file to be loaded.
+        Name of the model to be loaded.
 
     Returns
     -------
@@ -48,8 +48,8 @@ def import_model(name):
     ImportError
         Raised if a valid pytorch model cannot be found in loaded module.
     """
-    model_dir = os.path.join(lsst.utils.getPackageDir("meas_transiNet"), "models")
-    model_path = os.path.join(model_dir, f"{name}.py")
+    model_dir = os.path.join(lsst.utils.getPackageDir("meas_transiNet_data"), "models", name)
+    model_path = os.path.join(model_dir, "model.py")
     spec = importlib.util.spec_from_file_location(name, model_path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
@@ -63,3 +63,10 @@ def import_model(name):
         raise ImportError(f"Loaded class {model}, from {module}, is not a pytorch neural network module.")
 
     return model
+
+
+def get_weights_path(name):
+    """Return the full path to the weights file.
+    """
+    model_dir = os.path.join(lsst.utils.getPackageDir("meas_transiNet_data"), "models", name)
+    return os.path.join(model_dir, "weights.pt")
