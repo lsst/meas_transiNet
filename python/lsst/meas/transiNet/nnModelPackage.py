@@ -40,38 +40,7 @@ class NNModelPackage:
 
     def __init__(self, model_package_name):
         self.model_package_name = model_package_name
-
-    def storage_mode_from_path(self, path):
-        """Infer (decode!) storage mode from path string.
-        The storage mode is assumed to be encoded in the
-        path name e.g as "local:///" for local storage or
-        "neighbor:///" for neighbor data repository.
-
-        Parameters
-        ----------
-        path : string
-            Path pointing to a stored model package
-
-
-        Returns
-        -------
-        storage_mode :
-            Package storage mode
-
-        """
-        storage_mode = None  # TODO: replace with proper error handling by adding an 'else' below
-
-        try:  # To catch non-standard paths
-            token = path.split(':///')[0]
-            if token.lower() == 'local':
-                storage_mode = PackageStorageMode.local
-            elif token.lower() == 'neighbor':
-                storage_mode = PackageStorageMode.neighbor
-
-        except Exception:
-            pass  # TODO: replace with proper error handling
-
-        return storage_mode
+        self.adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
 
     def load(self, device):
         """Load model architecture and pretrained weights.
@@ -91,20 +60,10 @@ class NNModelPackage:
             the architecture module.
         """
 
-        # Parse storage mode out of the provided package name
-        self.storage_mode = self.storage_mode_from_path(self.model_package_name)
-
-        # Create a proper adapter based on the storage mode
-        if self.storage_mode == PackageStorageMode.local:
-            adapter = NNModelPackageAdapterLocal(self.model_package_name)
-        elif self.storage_mode == PackageStorageMode.neighbor:
-            adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
-        else:
-            raise NotImplementedError
 
         # Load various components based on the storage mode
-        model = adapter.load_model()
-        network_data = adapter.load_weights(device)
+        model = self.adapter.load_model()
+        network_data = self.adapter.load_weights(device)
 
         # Load pretrained weights into model
         model.load_state_dict(network_data['state_dict'], strict=True)
