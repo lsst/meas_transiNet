@@ -72,8 +72,7 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
 class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=TransiNetConnections):
     modelPackageName = lsst.pex.config.Field(
         dtype=str,
-        doc=("A path-like identifier of a model package. Currently supports the two modes: "
-             "local:/// and neighbor:///")
+        doc=("Name of the model to load from the ``rbClassifier_data`` repository")
     )
     cutoutSize = lsst.pex.config.Field(
         dtype=int,

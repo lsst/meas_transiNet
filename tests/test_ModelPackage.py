@@ -27,7 +27,7 @@ from .utils import NNModelPackageTest
 
 class TestModelPackageLocal(unittest.TestCase):
     def setUp(self):
-        self.model_package_name = 'local:///dummy'
+        self.model_package_name = 'dummy'
 
     def test_load(self):
         """Test loading of a local model package

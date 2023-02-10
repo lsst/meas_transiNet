@@ -27,7 +27,7 @@ from lsst.geom import Point2I, Point2D, Box2I
 import lsst.meas.base.tests
 import lsst.utils.tests
 
-from lsst.meas.transiNet import TransiNetTask
+from .utils import TransiNetTaskTest
 
 
 class TestTransiNetTask(lsst.utils.tests.TestCase):
@@ -41,11 +41,11 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
-        self.config = TransiNetTask.ConfigClass()
-        self.config.modelPackageName = "local:///dummy"
+        self.config = TransiNetTaskTest.ConfigClass()
+        self.config.modelPackageName = "dummy"
 
     def test_make_cutouts(self):
-        task = TransiNetTask(config=self.config)
+        task = TransiNetTaskTest(config=self.config)
         for record in self.catalog:
             result = task._make_cutouts(self.exposure, self.exposure, self.exposure, record)
             self._check_cutout(result.science, task.config.cutoutSize)
@@ -96,7 +96,7 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         mocking the interface infer step so we don't need to use pytorch.
         """
         scores = np.array([0.0, 1.0, 0.0])
-        task = TransiNetTask(config=self.config)
+        task = TransiNetTaskTest(config=self.config)
         task.interface.infer = unittest.mock.Mock(task.interface.infer)
         with unittest.mock.patch.object(task.interface, "infer") as mock_infer:
             mock_infer.return_value = scores

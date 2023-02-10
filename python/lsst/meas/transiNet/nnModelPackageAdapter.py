@@ -1,14 +1,15 @@
 import os
 import torch
-import glob
+
+import lsst.utils
 
 from .nnModelPackageAdapterBase import NNModelPackageAdapterBase
 from . import utils
 
-__all__ = ["NNModelPackageAdapterNeighbor"]
+__all__ = ["NNModelPackageAdapter"]
 
 
-class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
+class NNModelPackageAdapter(NNModelPackageAdapterBase):
     """
     An adapter class for interfacing with ModelPackages stored in
     'neighbor' mode: those of which both the code and pretrained weights
@@ -38,17 +39,10 @@ class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
         checkpoint_filename : string
 
         """
-        dir_name = os.path.join(os.getenv('RBCLASSIFIER_DATA_DIR'),
-                                "model_packages",
-                                self.model_package_name.split(':///')[1])
-
-        # We do not assume default file names in case of the 'neighbor' mode.
-        # For now we rely on a hacky pattern matching approach:
-        # There should be one and only one file named arch*.py under the dir.
-        # There should be one and only one file named *.pth.tar under the dir.
-
-        model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
-        checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
+        model_directory = os.path.join(lsst.utils.getPackageDir("rbClassifier_data"),
+                                       self.model_package_name)
+        model_filename = os.path.join(model_directory, self.model_package_name + ".py")
+        checkpoint_filename = os.path.join(model_directory, self.model_package_name + ".pth.tar")
 
         return model_filename, checkpoint_filename
 

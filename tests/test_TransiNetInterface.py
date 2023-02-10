@@ -23,13 +23,14 @@ import unittest
 
 import numpy as np
 
-from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
+from lsst.meas.transiNet import CutoutInputs
+from .utils import RBTransiNetInterfaceTest
 
 
 class TestOneCutout(unittest.TestCase):
     def setUp(self):
-        model_package_name = 'local:///dummy'
-        self.interface = RBTransiNetInterface(model_package_name)
+        model_package_name = 'dummy'
+        self.interface = RBTransiNetInterfaceTest(model_package_name)
 
     def test_infer_empty(self):
         """Test running infer on images containing all zeros.

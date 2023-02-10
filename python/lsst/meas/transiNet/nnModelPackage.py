@@ -21,12 +21,7 @@
 
 __all__ = ["NNModelPackage"]
 
-import enum
-
-from .nnModelPackageAdapterLocal import NNModelPackageAdapterLocal
-from .nnModelPackageAdapterNeighbor import NNModelPackageAdapterNeighbor
-
-PackageStorageMode = enum.Enum('PackageStorageMode', ['local', 'neighbor'])  # ,'butler', ...
+from .nnModelPackageAdapter import NNModelPackageAdapter
 
 
 class NNModelPackage:
@@ -40,7 +35,7 @@ class NNModelPackage:
 
     def __init__(self, model_package_name):
         self.model_package_name = model_package_name
-        self.adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
+        self.adapter = NNModelPackageAdapter(self.model_package_name)
 
     def load(self, device):
         """Load model architecture and pretrained weights.
@@ -59,7 +54,6 @@ class NNModelPackage:
             It's type should be a subclass of nn.Module, defined by
             the architecture module.
         """
-
 
         # Load various components based on the storage mode
         model = self.adapter.load_model()
