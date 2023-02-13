@@ -25,7 +25,7 @@ import numpy as np
 import dataclasses
 import torch
 
-from .nnModelPackage import NNModelPackage
+from .modelPackages.nnModelPackage import NNModelPackage
 
 
 @dataclasses.dataclass(frozen=True, kw_only=True)
