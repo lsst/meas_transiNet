@@ -1,13 +1,13 @@
 import os
 import torch
 
-from .nnModelPackageAdapterBase import NNModelPackageAdapterBase
+from .storageAdapterBase import StorageAdapterBase
 from . import utils
 
-__all__ = ["NNModelPackageAdapterLocal"]
+__all__ = ["StorageAdapterLocal"]
 
 
-class NNModelPackageAdapterLocal(NNModelPackageAdapterBase):
+class StorageAdapterLocal(StorageAdapterBase):
     """
     An adapter class for interfacing with ModelPackages stored in
     'local' mode: those of which both the code and pretrained weights

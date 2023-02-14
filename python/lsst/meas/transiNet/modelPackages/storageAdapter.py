@@ -2,8 +2,8 @@
 # of storage adapters: StorageAdapterLocal and SotrageAdapterNeighbor.
 # These represent possible storage types/modes for ModelPackages.
 
-from .nnModelPackageAdapterLocal import NNModelPackageAdapterLocal
-from .nnModelPackageAdapterNeighbor import NNModelPackageAdapterNeighbor
+from .storageAdapterLocal import StorageAdapterLocal
+from .storageAdapterNeighbor import StorageAdapterNeighbor
 from . import utils
 
 import torch
@@ -21,9 +21,9 @@ class StorageAdapter:
         '''
 
         if storageMode == 'local':
-            return NNModelPackageAdapterLocal(modelPackageName)
+            return StorageAdapterLocal(modelPackageName)
         elif storageMode == 'neighbor':
-            return NNModelPackageAdapterNeighbor(modelPackageName)
+            return StorageAdapterNeighbor(modelPackageName)
         else:
-            raise Exception("Unknown storage type: " + storageMode)
+            raise Exception("Unknown storage mode: " + storageMode)
 
