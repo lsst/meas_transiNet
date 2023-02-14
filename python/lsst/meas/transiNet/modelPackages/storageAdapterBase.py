@@ -1,14 +1,10 @@
-import abc
-
-
-class NNModelPackageAdapterBase(abc.ABC):
+class StorageAdapterBase(object):
     """
-    Abstract base class for NNModelPackageAdapter* adapters
+    Base class for StorageAdapter* adapters
     """
     def __init__(self, model_package_name):
         self.model_package_name = model_package_name
 
-    @abc.abstractmethod
     def fetch(self):
         """
         Derived classes must implement any potentially
@@ -21,9 +17,8 @@ class NNModelPackageAdapterBase(abc.ABC):
         -------
 
         """
-        return
+        pass
 
-    @abc.abstractmethod
     def load_model(self):
         """
         Load and return the model architecture
@@ -36,8 +31,8 @@ class NNModelPackageAdapterBase(abc.ABC):
         -------
         model : unknown subclass of nn.Module
         """
+        pass
 
-    @abc.abstractmethod
     def load_weights(self, device):
         """
         Load and return a network checkpoint
@@ -49,3 +44,4 @@ class NNModelPackageAdapterBase(abc.ABC):
         -------
         network_data : dict
         """
+        pass

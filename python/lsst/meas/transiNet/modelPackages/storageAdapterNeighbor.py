@@ -2,13 +2,13 @@ import os
 import torch
 import glob
 
-from .nnModelPackageAdapterBase import NNModelPackageAdapterBase
+from .storageAdapterBase import StorageAdapterBase
 from . import utils
 
-__all__ = ["NNModelPackageAdapterNeighbor"]
+__all__ = ["StorageAdapterNeighbor"]
 
 
-class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
+class StorageAdapterNeighbor(StorageAdapterBase):
     """ An adapter for interfacing with ModelPackages stored in the
     'neighbor' mode.
 
