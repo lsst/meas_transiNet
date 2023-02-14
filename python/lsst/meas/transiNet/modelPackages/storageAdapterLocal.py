@@ -1,4 +1,5 @@
 import os
+import glob
 
 from .storageAdapterBase import StorageAdapterBase
 
@@ -36,10 +37,14 @@ class StorageAdapterLocal(StorageAdapterBase):
                                 "model_packages",
                                 self.model_package_name)
 
+        # We do not assume default file names in case of the 'local' mode.
+        # For now we rely on a hacky pattern matching approach:
+        # There should be one and only one file named arch*.py under the dir.
+        # There should be one and only one file named *.pth.tar under the dir.
         try:
-            model_filename = os.path.join(dir_name, 'model.py')  # For now assume fixed filenames
-            checkpoint_filename = os.path.join(dir_name, 'checkpoint.pth.tar')  # For now assume fixed filenames
-        except FileNotFoundError:
+            model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
+            checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
+        except IndexError:
             raise FileNotFoundError("Cannot find model architecture or checkpoint file")
 
         return model_filename, checkpoint_filename
