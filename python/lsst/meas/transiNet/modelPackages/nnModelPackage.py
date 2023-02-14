@@ -23,6 +23,7 @@ __all__ = ["NNModelPackage"]
 
 from .storageAdapter import StorageAdapter
 
+
 class NNModelPackage:
     """
     A class to abstract physical storage of network architecture &

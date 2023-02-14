@@ -1,3 +1,7 @@
+from . import utils
+import torch
+
+
 class StorageAdapterBase(object):
     """
     Base class for StorageAdapter* adapters
@@ -31,7 +35,9 @@ class StorageAdapterBase(object):
         -------
         model : unknown subclass of nn.Module
         """
-        pass
+
+        model = utils.import_model(self.model_filename)
+        return model
 
     def load_weights(self, device):
         """
@@ -44,4 +50,6 @@ class StorageAdapterBase(object):
         -------
         network_data : dict
         """
-        pass
+
+        network_data = torch.load(self.checkpoint_filename, map_location=device)
+        return network_data
