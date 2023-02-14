@@ -42,7 +42,8 @@ class TestTransiNetTask(lsst.utils.tests.TestCase):
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
         self.config = TransiNetTask.ConfigClass()
-        self.config.modelPackageName = "local:///dummy"
+        self.config.modelPackageName = "dummy"
+        self.config.modelPackageStorageMode = "local"
 
     def test_make_cutouts(self):
         task = TransiNetTask(config=self.config)

@@ -36,7 +36,7 @@ class NNModelPackageAdapterLocal(NNModelPackageAdapterBase):
         """
         dir_name = os.path.join(os.getenv('MEAS_TRANSINET_DIR'),
                                 "model_packages",
-                                self.model_package_name.split(':///')[1])
+                                self.model_package_name)
         model_filename = os.path.join(dir_name, 'model.py')  # For now assume fixed filenames
         checkpoint_filename = os.path.join(dir_name, 'checkpoint.pth.tar')  # For now assume fixed filenames
 

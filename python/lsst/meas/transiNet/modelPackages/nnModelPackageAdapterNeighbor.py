@@ -41,7 +41,7 @@ class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
         """
         dir_name = os.path.join(os.getenv('RBCLASSIFIER_DATA_DIR'),
                                 "model_packages",
-                                self.model_package_name.split(':///')[1])
+                                self.model_package_name)
 
         # We do not assume default file names in case of the 'neighbor' mode.
         # For now we rely on a hacky pattern matching approach:

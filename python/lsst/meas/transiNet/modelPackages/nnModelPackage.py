@@ -39,40 +39,9 @@ class NNModelPackage:
     weights.
     """
 
-    def __init__(self, model_package_name):
+    def __init__(self, model_package_name, package_storage_mode):
         self.model_package_name = model_package_name
-
-    def storage_mode_from_path(self, path):
-        """Infer (decode!) storage mode from path string.
-        The storage mode is assumed to be encoded in the
-        path name e.g as "local:///" for local storage or
-        "neighbor:///" for neighbor data repository.
-
-        Parameters
-        ----------
-        path : string
-            Path pointing to a stored model package
-
-
-        Returns
-        -------
-        storage_mode :
-            Package storage mode
-
-        """
-        storage_mode = None  # TODO: replace with proper error handling by adding an 'else' below
-
-        try:  # To catch non-standard paths
-            token = path.split(':///')[0]
-            if token.lower() == 'local':
-                storage_mode = PackageStorageMode.local
-            elif token.lower() == 'neighbor':
-                storage_mode = PackageStorageMode.neighbor
-
-        except Exception:
-            pass  # TODO: replace with proper error handling
-
-        return storage_mode
+        self.package_storage_mode = package_storage_mode
 
     def load(self, device):
         """Load model architecture and pretrained weights.
