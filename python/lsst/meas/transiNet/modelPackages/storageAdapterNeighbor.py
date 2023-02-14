@@ -20,6 +20,19 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         self.fetch()
         self.model_filename, self.checkpoint_filename = self.get_filenames()
 
+    @staticmethod
+    def get_base_path():
+        """
+        Returns the base model packages storage path for this mode.
+
+        Returns
+        -------
+        str
+
+        """
+        return os.path.join(os.getenv('RBCLASSIFIER_DATA_DIR'),
+                            'model_packages')
+
     def get_filenames(self):
         """
         Find and return absolute paths to the architecture and checkpoint files
@@ -36,9 +49,7 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         -------
         FileNotFoundError
         """
-        dir_name = os.path.join(os.getenv('RBCLASSIFIER_DATA_DIR'),
-                                "model_packages",
-                                self.model_package_name)
+        dir_name = os.path.join(self.get_base_path(), self.model_package_name)
 
         # We do not assume default file names in case of the 'neighbor' mode.
         # For now we rely on a hacky pattern matching approach:

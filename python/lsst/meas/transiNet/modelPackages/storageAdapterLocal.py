@@ -18,6 +18,19 @@ class StorageAdapterLocal(StorageAdapterBase):
         self.fetch()
         self.model_filename, self.checkpoint_filename = self.get_filenames()
 
+    @staticmethod
+    def get_base_path():
+        """
+        Returns the base model packages storage path for this mode.
+
+        Returns
+        -------
+        str
+
+        """
+        return os.path.join(os.getenv('MEAS_TRANSINET_DIR'),
+                            'model_packages')
+
     def get_filenames(self):
         """
 
@@ -33,8 +46,7 @@ class StorageAdapterLocal(StorageAdapterBase):
         -------
         FileNotFoundError
         """
-        dir_name = os.path.join(os.getenv('MEAS_TRANSINET_DIR'),
-                                "model_packages",
+        dir_name = os.path.join(self.get_base_path(),
                                 self.model_package_name)
 
         # We do not assume default file names in case of the 'local' mode.
