@@ -37,6 +37,9 @@ class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
         model_filename : string
         checkpoint_filename : string
 
+        Raises:
+        -------
+        FileNotFoundError
         """
         dir_name = os.path.join(os.getenv('RBCLASSIFIER_DATA_DIR'),
                                 "model_packages",
@@ -46,9 +49,11 @@ class NNModelPackageAdapterNeighbor(NNModelPackageAdapterBase):
         # For now we rely on a hacky pattern matching approach:
         # There should be one and only one file named arch*.py under the dir.
         # There should be one and only one file named *.pth.tar under the dir.
-
-        model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
-        checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
+        try:
+            model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
+            checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
+        except IndexError:
+            raise FileNotFoundError("Cannot find model architecture or checkpoint file")
 
         return model_filename, checkpoint_filename
 
