@@ -23,6 +23,7 @@ __all__ = ["NNModelPackage"]
 
 from .storageAdapter import StorageAdapter
 
+
 class NNModelPackage:
     """
     A class to abstract physical storage of network architecture &
@@ -49,7 +50,7 @@ class NNModelPackage:
 
         Returns
         -------
-        model :
+        model : `torch.nn.Module`
             The neural network model, loaded with pretrained weights.
             It's type should be a subclass of nn.Module, defined by
             the architecture module.
@@ -58,7 +59,7 @@ class NNModelPackage:
         adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
 
         # Load various components based on the storage mode
-        model = adapter.load_model()
+        model = adapter.load_arch()
         network_data = adapter.load_weights(device)
 
         # Load pretrained weights into model

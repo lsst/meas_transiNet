@@ -1,7 +1,21 @@
+from . import utils
+import torch
+
+
 class StorageAdapterBase(object):
     """
-    Base class for StorageAdapter* adapters
+    Base class for storage adapters.
+
+    Parameters
+    ----------
+    model_package_name : `str`
+        The name of the model package, e.g. "my_model".
     """
+
+    model_package_name = None
+    """Name of the model package (`str`).
+    """
+
     def __init__(self, model_package_name):
         self.model_package_name = model_package_name
 
@@ -9,39 +23,47 @@ class StorageAdapterBase(object):
         """
         Derived classes must implement any potentially
         needed fetching operation in this method.
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-
+        This is the place to implement any sort of task
+        that needs to be done "only once", before loading
+        the model and weights. Multiple calls to this method
+        should not result in multiple fetches.
         """
         pass
 
-    def load_model(self):
+    def load_arch(self):
         """
         Load and return the model architecture
-        (no loading of pre-trained weights yet)
-
-        Parameters
-        ----------
+        (no loading of pre-trained weights).
 
         Returns
         -------
-        model : unknown subclass of nn.Module
+        model : `torch.nn.Module`
+            The model architecture. The exact type of this object
+            is model-specific.
+
+        See Also
+        --------
+        load_weights
         """
-        pass
+
+        model = utils.import_model(self.model_filename)
+        return model
 
     def load_weights(self, device):
         """
-        Load and return a network checkpoint
-
-        Parameters
-        ----------
+        Load and return a checkpoint of a neural network model.
 
         Returns
         -------
-        network_data : dict
+        network_data : `dict`
+            Dictionary containing a saved network state in PyTorch format,
+            composed of the trained weights, optimizer state, and other
+            useful metadata.
+
+        See Also
+        --------
+        load_arch
         """
-        pass
+
+        network_data = torch.load(self.checkpoint_filename, map_location=device)
+        return network_data

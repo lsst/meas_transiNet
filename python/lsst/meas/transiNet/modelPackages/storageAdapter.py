@@ -4,9 +4,7 @@
 
 from .storageAdapterLocal import StorageAdapterLocal
 from .storageAdapterNeighbor import StorageAdapterNeighbor
-from . import utils
 
-import torch
 
 class StorageAdapter:
 
@@ -26,4 +24,3 @@ class StorageAdapter:
             return StorageAdapterNeighbor(modelPackageName)
         else:
             raise Exception("Unknown storage mode: " + storageMode)
-

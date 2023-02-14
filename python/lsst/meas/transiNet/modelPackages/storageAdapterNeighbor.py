@@ -1,9 +1,7 @@
 import os
-import torch
 import glob
 
 from .storageAdapterBase import StorageAdapterBase
-from . import utils
 
 __all__ = ["StorageAdapterNeighbor"]
 
@@ -22,9 +20,6 @@ class StorageAdapterNeighbor(StorageAdapterBase):
 
         self.fetch()
         self.model_filename, self.checkpoint_filename = self.get_filenames()
-
-    def fetch(self):
-        pass
 
     def get_filenames(self):
         """
@@ -57,34 +52,3 @@ class StorageAdapterNeighbor(StorageAdapterBase):
             raise FileNotFoundError("Cannot find model architecture or checkpoint file")
 
         return model_filename, checkpoint_filename
-
-    def load_model(self):
-        """
-        Load and return the model architecture
-        (no loading of pre-trained weights yet)
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        model : unknown subclass of nn.Module
-        """
-
-        model = utils.import_model(self.model_filename)
-        return model
-
-    def load_weights(self, device):
-        """
-        Load and return a network checkpoint
-
-        Parameters
-        ----------
-
-        Returns
-        -------
-        network_data : dict
-        """
-
-        network_data = torch.load(self.checkpoint_filename, map_location=device)
-        return network_data
