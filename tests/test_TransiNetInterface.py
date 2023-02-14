@@ -28,8 +28,7 @@ from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 class TestOneCutout(unittest.TestCase):
     def setUp(self):
-        model_package_name = 'local:///dummy'
-        self.interface = RBTransiNetInterface(model_package_name)
+        self.interface = RBTransiNetInterface("dummy", "local")
 
     def test_infer_empty(self):
         """Test running infer on images containing all zeros.

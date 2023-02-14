@@ -22,17 +22,18 @@
 import unittest
 import torch
 
-from lsst.meas.transiNet import NNModelPackage
+from lsst.meas.transiNet.modelPackages.nnModelPackage import NNModelPackage
 
 
 class TestModelPackageLocal(unittest.TestCase):
     def setUp(self):
-        self.model_package_name = 'local:///dummy'
+        self.model_package_name = 'dummy'
+        self.package_storage_mode = 'local'
 
     def test_load(self):
         """Test loading of a local model package
         """
-        model_package = NNModelPackage(self.model_package_name)
+        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
         model = model_package.load(device='cpu')
 
         weights = next(model.parameters())
