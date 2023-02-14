@@ -21,13 +21,7 @@
 
 __all__ = ["NNModelPackage"]
 
-import enum
-
-from .nnModelPackageAdapterLocal import NNModelPackageAdapterLocal
-from .nnModelPackageAdapterNeighbor import NNModelPackageAdapterNeighbor
-
-PackageStorageMode = enum.Enum('PackageStorageMode', ['local', 'neighbor'])  # ,'butler', ...
-
+from .storageAdapter import StorageAdapter
 
 class NNModelPackage:
     """
@@ -60,16 +54,7 @@ class NNModelPackage:
             the architecture module.
         """
 
-        # Parse storage mode out of the provided package name
-        self.storage_mode = self.storage_mode_from_path(self.model_package_name)
-
-        # Create a proper adapter based on the storage mode
-        if self.storage_mode == PackageStorageMode.local:
-            adapter = NNModelPackageAdapterLocal(self.model_package_name)
-        elif self.storage_mode == PackageStorageMode.neighbor:
-            adapter = NNModelPackageAdapterNeighbor(self.model_package_name)
-        else:
-            raise NotImplementedError
+        adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
 
         # Load various components based on the storage mode
         model = adapter.load_model()
