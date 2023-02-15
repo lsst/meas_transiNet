@@ -27,6 +27,7 @@ import lsst.pipe.base
 import numpy as np
 
 from . import rbTransiNetInterface
+from .modelPackages import StorageAdapterNeighbor
 
 
 class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
@@ -74,13 +75,10 @@ class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=Tra
         dtype=str,
         doc=("A path-like unique identifier of a model package. ")
     )
-    modelPackageStorageMode = lsst.pex.config.ChoiceField(
+    modelPackageStorageAdapter = lsst.pex.config.ConfigurableField(
         dtype=str,
-        doc=("A string that indicates _where_ and _how_ the model package is stored."
-             "Currently supports the two modes: 'local' for packages stored in the current repository "
-             "and 'neighbor' for packages stored in the rbClassifier_data repository."),
-        allowed={'local': 'local', 'neighbor': 'neighbor'},
-        default='neighbor',
+        doc=("The adapter to specify how to load the model data."),
+        default=StorageAdapterNeighbor,
     )
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
@@ -98,9 +96,10 @@ class TransiNetTask(lsst.pipe.base.PipelineTask):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.makeSubtask("modelPackageStorageAdapter")
 
         self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName,
-                                                                   self.config.modelPackageStorageMode)
+                                                                   self.modelPackageStorageAdapter)
 
     def run(self, template, science, difference, diaSources):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]

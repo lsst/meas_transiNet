@@ -21,8 +21,6 @@
 
 __all__ = ["NNModelPackage"]
 
-from .storageAdapter import StorageAdapter
-
 
 class NNModelPackage:
     """
@@ -33,9 +31,9 @@ class NNModelPackage:
     ready to use.
     """
 
-    def __init__(self, model_package_name, package_storage_mode):
+    def __init__(self, model_package_name, package_storage_adapter):
         self.model_package_name = model_package_name
-        self.package_storage_mode = package_storage_mode
+        self.package_storage_adapter = package_storage_adapter
 
     def load(self, device):
         """Load model architecture and pretrained weights.
@@ -55,7 +53,7 @@ class NNModelPackage:
             the architecture module.
         """
 
-        adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
+        adapter = self.package_storage_adapter(self.model_package_name)
 
         # Load various components based on the storage mode
         model = adapter.load_model()

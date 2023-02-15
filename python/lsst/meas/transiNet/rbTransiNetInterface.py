@@ -47,9 +47,9 @@ class RBTransiNetInterface:
     RBTransiNet neural network model.
     """
 
-    def __init__(self, model_package_name, package_storage_mode, device='cpu'):
+    def __init__(self, model_package_name, package_storage_adapter, device='cpu'):
         self.model_package_name = model_package_name
-        self.package_storage_mode = package_storage_mode
+        self.package_storage_adapter = package_storage_adapter
         self.device = device
         self.init_model()
 

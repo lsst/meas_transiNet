@@ -1,8 +1,10 @@
 from . import utils
 import torch
 
+import lsst.pipe.base.Task
 
-class StorageAdapterBase(object):
+
+class StorageAdapterBase(lsst.pipe.base.Task):
     """
     Base class for StorageAdapter* adapters
     """
