@@ -14,6 +14,8 @@ class StorageAdapterNeighbor(StorageAdapterBase):
     Each model package is assumed to be a directory under the
     "model_packages" folder, in root of that repository.
     """
+    _DefaultName = "storageAdapterNeighbor"
+
     def __init__(self, model_package_name):
         super().__init__(model_package_name)
 

@@ -1,13 +1,20 @@
 from . import utils
 import torch
 
-import lsst.pipe.base.Task
+import lsst.pipe.base
+
+
+class StorageAdapterConfig(lsst.pex.config.Config):
+    pass
 
 
 class StorageAdapterBase(lsst.pipe.base.Task):
     """
     Base class for StorageAdapter* adapters
     """
+    ConfigClass = StorageAdapterConfig
+    _DefaultName = "storageAdapterBase"
+
     def __init__(self, model_package_name):
         self.model_package_name = model_package_name
 

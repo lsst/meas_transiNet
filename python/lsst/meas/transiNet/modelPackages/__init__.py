@@ -20,5 +20,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from .nnModelPackage import *
+from .storageAdapterNeighbor import *
 from .utils import *
 

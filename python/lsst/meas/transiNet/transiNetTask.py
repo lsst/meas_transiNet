@@ -76,9 +76,8 @@ class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=Tra
         doc=("A path-like unique identifier of a model package. ")
     )
     modelPackageStorageAdapter = lsst.pex.config.ConfigurableField(
-        dtype=str,
         doc=("The adapter to specify how to load the model data."),
-        default=StorageAdapterNeighbor,
+        target=StorageAdapterNeighbor,
     )
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
