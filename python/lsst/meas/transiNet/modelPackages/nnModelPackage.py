@@ -65,3 +65,34 @@ class NNModelPackage:
         model.load_state_dict(network_data['state_dict'], strict=True)
 
         return model
+
+    def get_model_input_shape(self):
+        """
+        Returns the input shape of the model.
+        """
+
+        # Temporarily return a hard-coded value, but
+        # display a warning to the user.
+        # TODO: Implement this method.
+        print("WARNING: get_model_input_shape() is not implemented yet.")
+        return (256, 256)
+
+    def get_input_scale_factors(self):
+        """
+        Returns the scale factors to be applied to the input data.
+        """
+        # Temporarily return a hard-coded value, but
+        # display a warning to the user.
+        # TODO: Implement this method.
+        print("WARNING: get_input_scale_factors() is not implemented yet.")
+        return (1.0, 1/300.0)
+
+    def get_boost_factor(self):
+        """
+        Returns the boost factor to be applied to the output data.
+        """
+        # Temporarily return a hard-coded value, but
+        # display a warning to the user.
+        # TODO: Implement this method.
+        print("WARNING: get_boost_factor() is not implemented yet.")
+        return 100.0
