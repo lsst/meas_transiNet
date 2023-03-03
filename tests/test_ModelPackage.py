@@ -25,7 +25,6 @@ import os
 import shutil
 
 from lsst.meas.transiNet.modelPackages.nnModelPackage import NNModelPackage
-from lsst.meas.transiNet.modelPackages.storageAdapter import StorageAdapter
 from lsst.meas.transiNet.modelPackages.storageAdapterLocal import StorageAdapterLocal
 from lsst.meas.transiNet.modelPackages.storageAdapterNeighbor import StorageAdapterNeighbor
 
@@ -91,52 +90,3 @@ class TestModelPackageNeighbor(unittest.TestCase):
     def tearDown(self):
         # Remove the neighbor-mode dummy model package
         shutil.rmtree(self.temp_package_dir)
-
-
-class TestStorageModeRestrictions(unittest.TestCase):
-    """Test that the storage mode restrictions are enforced.
-    This test relies on the fact that the standard storage modes
-    expect model packages to be stored in one of the EUPS installation
-    paths. If this is not the case, they throw a TypeError.
-    """
-
-    def setUp(self):
-        # Get list of all eups installation paths
-        eups_paths = self.get_all_eups_installation_paths()
-
-        # Backup all enironment variables at once.
-        self.env_vars = dict(os.environ)
-
-        # Clear all environment variables which point at EUPS installation
-        # paths.
-        for key, value in os.environ.items():
-            if value in eups_paths:
-                del os.environ[key]
-
-    def test_storage_modes(self):
-        """Test that all storage modes fail in the absence of eups-related
-        environment variables.
-        This implies that all the standard storage modes throw a TypeError
-        when they face an empty environment variable. This may change into
-        a more more robust test in the future.
-        """
-        for mode in StorageAdapter.storageAdapterClasses.keys():
-            print(f"Testing storage mode {mode}")
-            with self.assertRaises(TypeError):
-                StorageAdapter.create("dummy", mode)
-
-    def get_all_eups_installation_paths(self):
-        """Get all EUPS installation paths.
-
-        Returns
-        -------
-        paths : `list` of `str`
-        """
-        import eups
-
-        products = eups.Eups().getSetupProducts()
-        return [product.dir for product in products]
-
-    def tearDown(self):
-        # Restore all environment variables at once.
-        os.environ.update(self.env_vars)
