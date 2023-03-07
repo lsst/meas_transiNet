@@ -38,6 +38,8 @@ class NNModelPackage:
         self.model_package_name = model_package_name
         self.package_storage_mode = package_storage_mode
 
+        self.adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
+
     def load(self, device):
         """Load model architecture and pretrained weights.
         This method handles all different modes of storages.
@@ -56,11 +58,9 @@ class NNModelPackage:
             the architecture module.
         """
 
-        adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
-
         # Load various components based on the storage mode
-        model = adapter.load_arch()
-        network_data = adapter.load_weights(device)
+        model = self.adapter.load_arch()
+        network_data = self.adapter.load_weights(device)
 
         # Load pretrained weights into model
         model.load_state_dict(network_data['state_dict'], strict=True)

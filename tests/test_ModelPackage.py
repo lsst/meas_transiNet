@@ -54,6 +54,42 @@ class TestModelPackageLocal(unittest.TestCase):
                                                  [0.06509985, 0.11900973, -0.16013929]]),
                                    rtol=1e-8, atol=1e-8)
 
+    def test_arch_weights_mismatch(self):
+        """Test loading of a model package with mismatching architecture and
+        weights.
+
+        Does not use PyTorch's built-in serialization to be generic and
+        independent of the backend.
+        """
+        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
+
+        # Create a fake architecture file.
+        arch_f = os.path.basename(model_package.adapter.model_filename)
+        model_filename_backup = model_package.adapter.model_filename
+        model_package.adapter.model_filename = model_package.adapter.model_filename.replace(arch_f,
+                                                                                            'fake_' + arch_f)
+
+        with open(model_package.adapter.model_filename, 'w') as f:
+            # Write a dummy 1-layer fully connected network into the file.
+            f.write('__all__ = ["Net"]\n')
+            f.write('import torch\n')
+            f.write('import torch.nn as nn\n')
+            f.write('class Net(nn.Module):\n')
+            f.write('    def __init__(self):\n')
+            f.write('        super(Net, self).__init__()\n')
+            f.write('        self.fc1 = nn.Linear(3, 16)\n')
+            f.write('    def forward(self, x):\n')
+            f.write('        x = self.fc1(x)\n')
+            f.write('        return x\n')
+
+        # Now try to load the model.
+        with self.assertRaises(RuntimeError):
+            model_package.load(device='cpu')
+
+        # Clean up.
+        os.remove(model_package.adapter.model_filename)
+        model_package.adapter.model_filename = model_filename_backup
+
 
 class TestModelPackageNeighbor(unittest.TestCase):
     def setUp(self):
