@@ -69,6 +69,10 @@ class TestModelPackageNeighbor(unittest.TestCase):
         self.model_package_name = 'dummy'
         self.package_storage_mode = 'neighbor'
 
+    def tearDown(self):
+        # Remove the neighbor-mode dummy model package
+        shutil.rmtree(self.temp_package_dir)
+
     def test_load(self):
         """Test loading of a model package of neighbor mode
         """
@@ -86,7 +90,3 @@ class TestModelPackageNeighbor(unittest.TestCase):
                                                  [-0.03069756, -0.1093155, 0.15207087],
                                                  [0.06509985, 0.11900973, -0.16013929]]),
                                    rtol=1e-8, atol=1e-8)
-
-    def tearDown(self):
-        # Remove the neighbor-mode dummy model package
-        shutil.rmtree(self.temp_package_dir)
