@@ -45,6 +45,15 @@ class RBTransiNetInterface:
     """
     The interface between the LSST AP pipeline and a trained pytorch-based
     RBTransiNet neural network model.
+
+    Parameters
+    ----------
+    model_package_name : `str`
+        Name of the model package to load.
+    package_storage_mode : {'local', 'neighbor'}
+        Storage mode of the model package
+    device : `str`
+        Device to load and run the neural network on, e.g. 'cpu' or 'cuda:0'
     """
 
     def __init__(self, model_package_name, package_storage_mode, device='cpu'):
