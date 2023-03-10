@@ -32,8 +32,9 @@ class StorageAdapterFactory:
 
         Returns
         -------
-        storageAdapter : {StorageAdapterLocal, StorageAdapterNeighbor}
-            A storage adapter object, based on the storageMode parameter.
+        storageAdapter : `StorageAdapterBase`
+            A storage adapter object, based on the storageMode parameter. It is
+            an instance of one of the classes in the storageAdapterClasses
         """
         # Check that the storage mode is valid.
         if storageMode not in cls.storageAdapterClasses:
