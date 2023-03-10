@@ -2,7 +2,7 @@ from .storageAdapterLocal import StorageAdapterLocal
 from .storageAdapterNeighbor import StorageAdapterNeighbor
 
 
-class StorageAdapter:
+class StorageAdapterFactory:
     """A class factory for creating two types of storage adapters:
     StorageAdapterLocal and SotrageAdapterNeighbor. These represent
     possible storage types/modes for ModelPackages.

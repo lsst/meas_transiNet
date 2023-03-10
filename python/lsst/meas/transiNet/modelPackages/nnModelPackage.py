@@ -21,7 +21,7 @@
 
 __all__ = ["NNModelPackage"]
 
-from .storageAdapter import StorageAdapter
+from .storageAdapterFactory import StorageAdapterFactory
 
 
 class NNModelPackage:
@@ -38,7 +38,7 @@ class NNModelPackage:
         self.model_package_name = model_package_name
         self.package_storage_mode = package_storage_mode
 
-        self.adapter = StorageAdapter.create(self.model_package_name, self.package_storage_mode)
+        self.adapter = StorageAdapterFactory.create(self.model_package_name, self.package_storage_mode)
 
     def load(self, device):
         """Load model architecture and pretrained weights.
