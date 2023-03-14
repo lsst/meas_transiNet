@@ -24,9 +24,9 @@ class StorageAdapterBase(object):
         Derived classes must implement any potentially
         needed fetching operation in this method.
         This is the place to implement any sort of task
-        that needs to be done "only once", before loading
-        the model and weights. Multiple calls to this method
-        should not result in multiple fetches.
+        that needs to be done before loading the model and weights.
+        Multiple calls to this method must not result in multiple
+        fetches.
         """
         pass
 
@@ -34,6 +34,11 @@ class StorageAdapterBase(object):
         """
         Load and return the model architecture
         (no loading of pre-trained weights).
+
+        Parameters
+        ----------
+        device : `torch.device`
+            Device to load the model on.
 
         Returns
         -------
@@ -52,6 +57,11 @@ class StorageAdapterBase(object):
     def load_weights(self, device):
         """
         Load and return a checkpoint of a neural network model.
+
+        Parameters
+        ----------
+        device : `torch.device`
+            Device to load the pretrained weights on.
 
         Returns
         -------

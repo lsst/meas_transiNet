@@ -26,8 +26,9 @@ from .storageAdapterFactory import StorageAdapterFactory
 
 class NNModelPackage:
     """
-    A class to abstract physical storage of network architecture &
+    An interface to abstract physical storage of network architecture &
     pretrained models out of clients' code.
+
     It handles all necessary required tasks, including fetching,
     decompression, etc. per need and creates a "Model Package"
     ready to use: a model architecture loaded with specific pretrained
@@ -54,7 +55,7 @@ class NNModelPackage:
         -------
         model : `torch.nn.Module`
             The neural network model, loaded with pretrained weights.
-            It's type should be a subclass of nn.Module, defined by
+            Its type should be a subclass of nn.Module, defined by
             the architecture module.
         """
 

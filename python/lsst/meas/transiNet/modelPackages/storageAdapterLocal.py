@@ -22,11 +22,12 @@ class StorageAdapterLocal(StorageAdapterBase):
     @staticmethod
     def get_base_path():
         """
-        Returns the base model packages storage path for this mode.
+        Return the base model packages storage path for this mode.
 
         Returns
         -------
         `str`
+            The base path to the model packages storage.
 
         """
         try:
@@ -38,9 +39,7 @@ class StorageAdapterLocal(StorageAdapterBase):
 
     def get_filenames(self):
         """
-
-        Parameters
-        ----------
+        Find and return absolute paths to the architecture and checkpoint files
 
         Returns
         -------
@@ -50,8 +49,9 @@ class StorageAdapterLocal(StorageAdapterBase):
             The full path to the file containing the saved checkpoint.
 
         Raises
-        -------
+        ------
         FileNotFoundError
+            If the model package is not found.
         """
         dir_name = os.path.join(self.get_base_path(),
                                 self.model_package_name)

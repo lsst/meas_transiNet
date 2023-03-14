@@ -3,9 +3,14 @@ from .storageAdapterNeighbor import StorageAdapterNeighbor
 
 
 class StorageAdapterFactory:
-    """A class factory for creating two types of storage adapters:
-    StorageAdapterLocal and SotrageAdapterNeighbor. These represent
-    possible storage types/modes for ModelPackages.
+    """A factory for storage adapters, which represent possible storage
+    types/modes for ModelPackages.
+
+    As of March 2023, the following modes are supported:
+    neighbor
+        A ModelPackage stored inside the ``rbClassifier_data`` Git repository.
+    local
+        A ModelPackage stored inside the ``meas_transiNet`` Git repository.
     """
 
     # A dict mapping storage modes to storage adapter class.
@@ -34,7 +39,8 @@ class StorageAdapterFactory:
         -------
         storageAdapter : `StorageAdapterBase`
             A storage adapter object, based on the storageMode parameter. It is
-            an instance of one of the classes in the storageAdapterClasses
+            an instance of one of the classes in the
+            storageAdapterFactory.storageAdapterClasses dict.
         """
         # Check that the storage mode is valid.
         if storageMode not in cls.storageAdapterClasses:

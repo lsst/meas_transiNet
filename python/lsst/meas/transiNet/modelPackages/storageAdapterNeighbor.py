@@ -28,7 +28,8 @@ class StorageAdapterNeighbor(StorageAdapterBase):
 
         Returns
         -------
-        str
+        `str`
+            The base path to the model packages storage.
 
         """
         try:
@@ -47,12 +48,16 @@ class StorageAdapterNeighbor(StorageAdapterBase):
 
         Returns
         -------
-        model_filename : string
-        checkpoint_filename : string
+        model_filename : `str`
+            The full path to the .py file containing the model architecture.
+        checkpoint_filename : `str`
+            The full path to the file containing the saved checkpoint.
 
-        Raises:
-        -------
+        Raises
+        ------
         FileNotFoundError
+            If any of the underlying files cannot be accessed. This may also
+            be raised if the model package directory is not found.
         """
         dir_name = os.path.join(self.get_base_path(), self.model_package_name)
 
