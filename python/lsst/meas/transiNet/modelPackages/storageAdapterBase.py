@@ -30,7 +30,7 @@ class StorageAdapterBase(object):
         """
         pass
 
-    def load_arch(self):
+    def load_arch(self, device):
         """
         Load and return the model architecture
         (no loading of pre-trained weights).
@@ -46,7 +46,7 @@ class StorageAdapterBase(object):
         load_weights
         """
 
-        model = utils.import_model(self.model_filename)
+        model = utils.import_model(self.model_filename).to(device)
         return model
 
     def load_weights(self, device):

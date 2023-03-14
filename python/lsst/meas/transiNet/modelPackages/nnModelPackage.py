@@ -59,7 +59,7 @@ class NNModelPackage:
         """
 
         # Load various components based on the storage mode
-        model = self.adapter.load_arch()
+        model = self.adapter.load_arch(device)
         network_data = self.adapter.load_weights(device)
 
         # Load pretrained weights into model
