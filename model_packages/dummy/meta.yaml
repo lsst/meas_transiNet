@@ -1,0 +1,10 @@
+# General information about the model stored in the package,
+# as well as important hyperparameters and settings, pertaining the model.
+
+version: 0.1
+description: A dummy model for testing purposes.
+
+# The model's hyperparameters and settings.
+input_shape: [256, 256, 3] # The input shape of the model -- [height, width, channels].
+input_scale_factor: [1.0, 0.0033333333333333335, 1.0] # The input scale factor -- one element per input channel.
+#boost_factor: 100.0 # The boost factor for the model's output.
