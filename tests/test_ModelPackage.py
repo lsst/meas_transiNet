@@ -127,6 +127,37 @@ class TestModelPackageLocal(unittest.TestCase):
         with self.assertRaises(ValueError):
             model_package.load(device=None)
 
+    def test_metadata(self):
+        """Test loading of metadata
+        """
+        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
+
+        # Test whether the metadata object exists.
+        # (it should be automatically loaded when the model package
+        # is constructed)
+        self.assertTrue(hasattr(model_package, 'metadata'))
+
+        # Test whether the metadata object is a dictionary.
+        self.assertIsInstance(model_package.metadata, dict)
+
+        # Test whether the metadata object contains the mandatory keys.
+        self.assertListEqual(list(model_package.metadata.keys()),
+                             ['version', 'description',
+                              'input_shape', 'input_scale_factor'],
+                             msg='Metadata object does not contain the mandatory keys.')
+
+        # Test whether the metadata-related methods return the correct values
+        # for the dummy model package.
+        self.assertEqual(model_package.get_model_input_shape(), (256, 256, 3))
+        self.assertEqual(model_package.get_input_scale_factors(), (1.0, 0.0033333333333333335, 1.0))
+        with self.assertRaises(KeyError):
+            model_package.get_boost_factor()  # No boost factor for dummy
+
+        # Test whether the number of scale factor elements matches the number
+        # of input channels.
+        self.assertEqual(len(model_package.get_input_scale_factors()),
+                         model_package.get_model_input_shape()[2])
+
 
 @unittest.skipIf(neighborDirectory is None, "rbClassifier_data not setup")
 class TestModelPackageNeighbor(unittest.TestCase):
@@ -172,3 +203,34 @@ class TestModelPackageNeighbor(unittest.TestCase):
                                                  [-0.03069756, -0.1093155, 0.15207087],
                                                  [0.06509985, 0.11900973, -0.16013929]]),
                                    rtol=1e-8, atol=1e-8)
+
+    def test_metadata(self):
+        """Test loading of metadata
+        """
+        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
+
+        # Test whether the metadata object exists.
+        # (it should be automatically loaded when the model package
+        # is constructed)
+        self.assertTrue(hasattr(model_package, 'metadata'))
+
+        # Test whether the metadata object is a dictionary.
+        self.assertIsInstance(model_package.metadata, dict)
+
+        # Test whether the metadata object contains the mandatory keys.
+        self.assertListEqual(list(model_package.metadata.keys()),
+                             ['version', 'description',
+                              'input_shape', 'input_scale_factor'],
+                             msg='Metadata object does not contain the mandatory keys.')
+
+        # Test whether the metadata-related methods return the correct values
+        # for the dummy model package.
+        self.assertEqual(model_package.get_model_input_shape(), (256, 256, 3))
+        self.assertEqual(model_package.get_input_scale_factors(), (1.0, 0.0033333333333333335, 1.0))
+        with self.assertRaises(KeyError):
+            model_package.get_boost_factor()  # No boost factor for dummy
+
+        # Test whether the number of scale factor elements matches the number
+        # of input channels.
+        self.assertEqual(len(model_package.get_input_scale_factors()),
+                         model_package.get_model_input_shape()[2])
