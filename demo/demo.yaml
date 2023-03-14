@@ -17,6 +17,6 @@ tasks:
   rbClassify:
     class: lsst.meas.transiNet.TransiNetTask
     config:
-      modelFile: testModel
-      weightsFile: '../tests/data/checkpoint.pth.zip'
+      modelPackageName: 'dummy'
+      modelPackageStorageMode: 'local'
       connections.coaddName: 'goodSeeing'
