@@ -1,5 +1,6 @@
 from . import utils
 import torch
+import yaml
 
 
 class StorageAdapterBase(object):
@@ -77,3 +78,16 @@ class StorageAdapterBase(object):
 
         network_data = torch.load(self.checkpoint_filename, map_location=device)
         return network_data
+
+    def load_metadata(self):
+        """
+        Load and return the metadata associated with the model package.
+
+        Returns
+        -------
+        metadata : `dict`
+            Dictionary containing the metadata associated with the model.
+        """
+        with open(self.metadata_filename, 'r') as f:
+            metadata = yaml.safe_load(f)
+        return metadata

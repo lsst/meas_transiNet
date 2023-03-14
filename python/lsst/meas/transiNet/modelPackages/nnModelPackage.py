@@ -48,6 +48,7 @@ class NNModelPackage:
         self.package_storage_mode = package_storage_mode
 
         self.adapter = StorageAdapterFactory.create(self.model_package_name, self.package_storage_mode)
+        self.metadata = self.adapter.load_metadata()
 
     def load(self, device):
         """Load model architecture and pretrained weights.
@@ -79,3 +80,55 @@ class NNModelPackage:
         model.load_state_dict(network_data['state_dict'], strict=True)
 
         return model
+
+    def get_model_input_shape(self):
+        """ Return the input shape of the model.
+
+        Returns
+        -------
+        input_shape : `tuple`
+            The input shape of the model -- (height, width), ignores
+            the other dimensions.
+
+        Raises
+        ------
+        KeyError
+            If the input shape is not found in the metadata.
+        """
+        return tuple(self.metadata['input_shape'])
+
+    def get_input_scale_factors(self):
+        """
+        Return the scale factors to be applied to the input data.
+
+        Returns
+        -------
+        scale_factors : `tuple`
+            The scale factors to be applied to the input data.
+
+        Raises
+        ------
+        KeyError
+            If the scale factors are not found in the metadata.
+        """
+        return tuple(self.metadata['input_scale_factor'])
+
+    def get_boost_factor(self):
+        """
+        Return the boost factor to be applied to the output data.
+
+        If the boost factor is not found in the metadata, return None.
+        It is the responsibility of the client to know whether this type
+        of model requires a boost factor or not.
+
+        Returns
+        -------
+        boost_factor : `float`
+            The boost factor to be applied to the output data.
+
+        Raises
+        ------
+        KeyError
+            If the boost factor is not found in the metadata.
+        """
+        return self.metadata['boost_factor']

@@ -19,7 +19,7 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         super().__init__(model_package_name)
 
         self.fetch()
-        self.model_filename, self.checkpoint_filename = self.get_filenames()
+        self.model_filename, self.checkpoint_filename, self.metadata_filename = self.get_filenames()
 
     @staticmethod
     def get_base_path():
@@ -65,10 +65,12 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         # For now we rely on a hacky pattern matching approach:
         # There should be one and only one file named arch*.py under the dir.
         # There should be one and only one file named *.pth.tar under the dir.
+        # There should be one and only one file named meta*.yaml under the dir.
         try:
             model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
             checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
+            metadata_filename = glob.glob(f'{dir_name}/meta*.yaml')[0]
         except IndexError:
             raise FileNotFoundError("Cannot find model architecture or checkpoint file")
 
-        return model_filename, checkpoint_filename
+        return model_filename, checkpoint_filename, metadata_filename
