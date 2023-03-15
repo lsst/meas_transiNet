@@ -117,6 +117,14 @@ class TestModelPackageNeighbor(unittest.TestCase):
 
         weights = next(model.parameters())
 
+        # test to make sure the model package is loading from the
+        # neighbor repository.
+        #
+        # TODO: later if we move this test to the neighbor package itself, this
+        # check needs to be updated.
+        self.assertTrue(model_package.adapter.checkpoint_filename.startswith(
+            lsst.utils.getPackageDir("rbClassifier_data")))
+
         # test shape of loaded weights
         self.assertTupleEqual(weights.shape, (16, 3, 3, 3))
 
