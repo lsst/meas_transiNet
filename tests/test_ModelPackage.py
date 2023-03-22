@@ -28,6 +28,12 @@ from lsst.meas.transiNet.modelPackages.nnModelPackage import NNModelPackage
 from lsst.meas.transiNet.modelPackages.storageAdapterLocal import StorageAdapterLocal
 from lsst.meas.transiNet.modelPackages.storageAdapterNeighbor import StorageAdapterNeighbor
 
+import lsst.utils
+try:
+    neighborDirectory = lsst.utils.getPackageDir("rbClassifier_data")
+except LookupError:
+    neighborDirectory = None
+
 
 class TestModelPackageLocal(unittest.TestCase):
     def setUp(self):
@@ -121,6 +127,7 @@ class TestModelPackageLocal(unittest.TestCase):
             model_package.load(device=None)
 
 
+@unittest.skipIf(neighborDirectory is None, "rbClassifier_data not setup")
 class TestModelPackageNeighbor(unittest.TestCase):
     def setUp(self):
         # Create a dummy model package in the neighboring repository
