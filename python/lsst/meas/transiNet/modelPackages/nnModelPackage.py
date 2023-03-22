@@ -23,6 +23,8 @@ __all__ = ["NNModelPackage"]
 
 from .storageAdapterFactory import StorageAdapterFactory
 
+import torch
+
 
 class NNModelPackage:
     """
@@ -36,6 +38,12 @@ class NNModelPackage:
     """
 
     def __init__(self, model_package_name, package_storage_mode):
+        # Validate passed arguments.
+        if package_storage_mode not in StorageAdapterFactory.storageAdapterClasses.keys():
+            raise ValueError("Unsupported storage mode: %s" % package_storage_mode)
+        if None in (model_package_name, package_storage_mode):
+            raise ValueError("None is not a valid argument")
+
         self.model_package_name = model_package_name
         self.package_storage_mode = package_storage_mode
 
@@ -58,6 +66,10 @@ class NNModelPackage:
             Its type should be a subclass of nn.Module, defined by
             the architecture module.
         """
+
+        # Check if the specified device is valid.
+        if device not in ['cpu'] + ['cuda:%d' % i for i in range(torch.cuda.device_count())]:
+            raise ValueError("Invalid device: %s" % device)
 
         # Load various components based on the storage mode
         model = self.adapter.load_arch(device)

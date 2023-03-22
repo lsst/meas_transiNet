@@ -90,6 +90,36 @@ class TestModelPackageLocal(unittest.TestCase):
         os.remove(model_package.adapter.model_filename)
         model_package.adapter.model_filename = model_filename_backup
 
+    def test_invalid_inputs(self):
+        """Test invalid and missing inputs
+        (of NNModelPackage constructor, as well as the load method)
+        """
+        with self.assertRaises(ValueError):
+            NNModelPackage('dummy', 'invalid')
+
+        with self.assertRaises(ValueError):
+            NNModelPackage('invalid', None)
+
+        with self.assertRaises(ValueError):
+            NNModelPackage(None, 'local')
+
+        with self.assertRaises(ValueError):
+            NNModelPackage(None, 'invalid')
+
+        with self.assertRaises(ValueError):
+            NNModelPackage(None, None)
+
+        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
+
+        with self.assertRaises(ValueError):
+            model_package.load(device='invalid')
+
+        with self.assertRaises(ValueError):
+            model_package.load(device='gpu199')
+
+        with self.assertRaises(ValueError):
+            model_package.load(device=None)
+
 
 class TestModelPackageNeighbor(unittest.TestCase):
     def setUp(self):

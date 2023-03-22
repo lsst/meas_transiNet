@@ -43,6 +43,8 @@ class StorageAdapterFactory:
             storageAdapterFactory.storageAdapterClasses dict.
         """
         # Check that the storage mode is valid.
+        # Convert to lower case to make it case insensitive.
+        storageMode = storageMode.lower()
         if storageMode not in cls.storageAdapterClasses:
             raise ValueError('Invalid storage mode: ' + storageMode)
 
