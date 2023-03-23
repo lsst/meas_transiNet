@@ -35,7 +35,7 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         try:
             base_path = os.environ['RBCLASSIFIER_DATA_DIR']
         except KeyError:
-            raise KeyError("The environment variable RBCLASSIFIER_DATA_DIR is not set.")
+            raise RuntimeError("The environment variable RBCLASSIFIER_DATA_DIR is not set.")
 
         return os.path.join(base_path, 'model_packages')
 
