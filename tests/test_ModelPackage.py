@@ -75,26 +75,27 @@ class TestModelPackageLocal(unittest.TestCase):
         model_package.adapter.model_filename = model_package.adapter.model_filename.replace(arch_f,
                                                                                             'fake_' + arch_f)
 
-        with open(model_package.adapter.model_filename, 'w') as f:
-            # Write a dummy 1-layer fully connected network into the file.
-            f.write('__all__ = ["Net"]\n')
-            f.write('import torch\n')
-            f.write('import torch.nn as nn\n')
-            f.write('class Net(nn.Module):\n')
-            f.write('    def __init__(self):\n')
-            f.write('        super(Net, self).__init__()\n')
-            f.write('        self.fc1 = nn.Linear(3, 16)\n')
-            f.write('    def forward(self, x):\n')
-            f.write('        x = self.fc1(x)\n')
-            f.write('        return x\n')
+        try:
+            with open(model_package.adapter.model_filename, 'w') as f:
+                # Write a dummy 1-layer fully connected network into the file.
+                f.write('__all__ = ["Net"]\n')
+                f.write('import torch\n')
+                f.write('import torch.nn as nn\n')
+                f.write('class Net(nn.Module):\n')
+                f.write('    def __init__(self):\n')
+                f.write('        super(Net, self).__init__()\n')
+                f.write('        self.fc1 = nn.Linear(3, 16)\n')
+                f.write('    def forward(self, x):\n')
+                f.write('        x = self.fc1(x)\n')
+                f.write('        return x\n')
+        finally:
+            # Now try to load the model.
+            with self.assertRaises(RuntimeError):
+                model_package.load(device='cpu')
 
-        # Now try to load the model.
-        with self.assertRaises(RuntimeError):
-            model_package.load(device='cpu')
-
-        # Clean up.
-        os.remove(model_package.adapter.model_filename)
-        model_package.adapter.model_filename = model_filename_backup
+            # Clean up.
+            os.remove(model_package.adapter.model_filename)
+            model_package.adapter.model_filename = model_filename_backup
 
     def test_invalid_inputs(self):
         """Test invalid and missing inputs
