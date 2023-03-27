@@ -29,6 +29,9 @@ import numpy as np
 
 from . import rbTransiNetInterface
 
+def lookupFunction(dataSetType, registry, dataId, collections):
+    results = registry.queryDatasets(dataSetType, collections='pretrained_models')
+    return list(results)
 
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
                              dimensions=("instrument", "visit", "detector"),
@@ -58,6 +61,15 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         dimensions=("instrument", "visit", "detector"),
         storageClass="SourceCatalog",
         name="{fakesType}{coaddName}Diff_diaSrc",
+    )
+
+    pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
+        name="pretrainedModel",
+        dimensions=("instrument",),
+        storageClass="StructuredDataDict",
+        doc="Static pretrained model for the RBClassifier.",
+
+        lookupFunction=lookupFunction,
     )
 
     # Outputs
@@ -104,7 +116,7 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
                                                                    self.config.modelPackageStorageMode)
 
     @timeMethod
-    def run(self, template, science, difference, diaSources):
+    def run(self, template, science, difference, diaSources, pretrainedModel):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
         self.log.info("Extracted %d cutouts.", len(cutouts))
         scores = self.interface.infer(cutouts)
@@ -119,6 +131,12 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         classifications["score"] = scores
 
         return lsst.pipe.base.Struct(classifications=classifications)
+
+    def runQuantum(self, butlerQC, inputRefs, outputRefs):
+        inputs = butlerQC.get(inputRefs)
+        print(">>>>>>>>> Here you can have your own functionality")
+        outputs = self.run(**inputs)
+        butlerQC.put(outputs, outputRefs)
 
     def _make_cutouts(self, template, science, difference, source):
         """Return cutouts of each image centered at the source location.
