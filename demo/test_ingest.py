@@ -2,7 +2,7 @@ from lsst.daf.butler import Butler, DatasetType, FileDataset, StorageClass, Data
 from lsst.meas.transiNet.modelPackages.storageAdapterButlerHybrid import BinaryFormatter, PytorchCheckpointFormatter
 
 # Set up the Butler
-butler = Butler("/repo/apv", run="pretrained_models")
+butler = Butler("/repo/apv", run="pretrained_models/dummy")
 
 # Print all known storage classes
 #print(butler.registry.storageClasses)
@@ -32,7 +32,9 @@ def register_dataset_type(butler, dataset_type_name, storage_class):
         return dataset_type
 
 def do_ingestion(butler, dataset_type, data_id, file_path):
-    # Create a FileDataset instance from the file
+    # Create a FileDataset instance from the file.
+    # The dataset needs to be igested into a specific collection.
+
     file_dataset = FileDataset(path=file_path,
                                refs=DatasetRef(dataset_type, data_id),
                                #formatter=BinaryFormatter,
@@ -41,6 +43,7 @@ def do_ingestion(butler, dataset_type, data_id, file_path):
 
     # Ingest the file into the butler
     butler.ingest(file_dataset,
+                  run="pretrained_models/dummy",
                   transfer='copy')
 
 
