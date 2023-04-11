@@ -67,10 +67,21 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         # There should be one and only one file named *.pth.tar under the dir.
         # There should be one and only one file named meta*.yaml under the dir.
         try:
-            model_filename = glob.glob(f'{dir_name}/arch*.py')[0]
-            checkpoint_filename = glob.glob(f'{dir_name}/*.pth.tar')[0]
-            metadata_filename = glob.glob(f'{dir_name}/meta*.yaml')[0]
+            model_filenames = glob.glob(f'{dir_name}/arch*.py')
+            checkpoint_filenames = glob.glob(f'{dir_name}/*.pth.tar')
+            metadata_filenames = glob.glob(f'{dir_name}/meta*.yaml')
         except IndexError:
-            raise FileNotFoundError("Cannot find model architecture or checkpoint file")
+            raise FileNotFoundError("Cannot find model architecture, checkpoint or metadata file.")
 
-        return model_filename, checkpoint_filename, metadata_filename
+        # Check that there's only one file for each of the three categories.
+        if len(model_filenames) != 1:
+            raise RuntimeError(f"Found {len(model_filenames)} model files, "
+                               f"expected 1 in {dir_name}.")
+        if len(checkpoint_filenames) != 1:
+            raise RuntimeError(f"Found {len(checkpoint_filenames)} checkpoint files, "
+                               f"expected 1 in {dir_name}.")
+        if len(metadata_filenames) != 1:
+            raise RuntimeError(f"Found {len(metadata_filenames)} metadata files, "
+                               f"expected 1 in {dir_name}.")
+
+        return model_filenames[0], checkpoint_filenames[0], metadata_filenames[0]
