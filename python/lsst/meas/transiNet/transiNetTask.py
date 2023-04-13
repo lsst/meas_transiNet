@@ -19,7 +19,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ["TransiNetTask", "TransiNetConfig"]
+__all__ = ["RBTransiNetTask", "RBTransiNetConfig"]
 
 import lsst.geom
 import lsst.pex.config
@@ -29,9 +29,9 @@ import numpy as np
 from . import rbTransiNetInterface
 
 
-class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
-                           dimensions=("instrument", "visit", "detector"),
-                           defaultTemplates={"coaddName": "deep", "fakesType": ""}):
+class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
+                             dimensions=("instrument", "visit", "detector"),
+                             defaultTemplates={"coaddName": "deep", "fakesType": ""}):
     # NOTE: Do we want the "ready to difference" template, or something
     # earlier? This one is warped, but not PSF-matched.
     template = lsst.pipe.base.connectionTypes.Input(
@@ -69,7 +69,7 @@ class TransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
     )
 
 
-class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=TransiNetConnections):
+class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections):
     modelPackageName = lsst.pex.config.Field(
         dtype=str,
         doc=("A unique identifier of a model package. ")
@@ -89,12 +89,12 @@ class TransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=Tra
     )
 
 
-class TransiNetTask(lsst.pipe.base.PipelineTask):
+class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     """Task for running TransiNet real/bogus classification on the output of
     the image subtraction pipeline.
     """
-    _DefaultName = "transiNet"
-    ConfigClass = TransiNetConfig
+    _DefaultName = "rbTransiNet"
+    ConfigClass = RBTransiNetConfig
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
