@@ -18,5 +18,5 @@ tasks:
     class: lsst.meas.transiNet.TransiNetTask
     config:
       modelPackageName: 'dummy'
-      modelPackageStorageMode: 'local'
+      modelPackageStorageMode: 'butler-hybrid'
       connections.coaddName: 'goodSeeing'

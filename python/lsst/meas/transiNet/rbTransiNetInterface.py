@@ -48,6 +48,8 @@ class RBTransiNetInterface:
 
     Parameters
     ----------
+    task : `lsst.meas.transiNet.RBTransiNetTask`
+        The task that is using this interface: the 'left side' of the interface.
     model_package_name : `str`
         Name of the model package to load.
     package_storage_mode : {'local', 'neighbor'}
@@ -56,16 +58,19 @@ class RBTransiNetInterface:
         Device to load and run the neural network on, e.g. 'cpu' or 'cuda:0'
     """
 
-    def __init__(self, model_package_name, package_storage_mode, device='cpu'):
-        self.model_package_name = model_package_name
-        self.package_storage_mode = package_storage_mode
+    def __init__(self, task, device='cpu'):
+        self.task = task
+        self.model_package_name = task.config.modelPackageName
+        self.package_storage_mode = task.config.modelPackageStorageMode
         self.device = device
         self.init_model()
 
     def init_model(self):
         """Create and initialize an NN model
         """
-        model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
+        model_package = NNModelPackage(model_package_name=self.model_package_name,
+                                       package_storage_mode=self.package_storage_mode,
+                                       preloaded_weights=self.task.butler_loaded_weights)
         self.model = model_package.load(self.device)
 
         # Put the model in evaluation mode instead of training model.

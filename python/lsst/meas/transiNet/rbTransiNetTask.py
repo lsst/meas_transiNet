@@ -28,10 +28,8 @@ from lsst.utils.timer import timeMethod
 import numpy as np
 
 from . import rbTransiNetInterface
+from lsst.meas.transiNet.modelPackages.storageAdapterButlerHybrid import StorageAdapterButlerHybrid
 
-def lookupFunction(dataSetType, registry, dataId, collections):
-    results = registry.queryDatasets(dataSetType, collections='pretrained_models')
-    return list(results)
 
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
                              dimensions=("instrument", "visit", "detector"),
@@ -63,15 +61,6 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         name="{fakesType}{coaddName}Diff_diaSrc",
     )
 
-    pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
-        name="pretrainedModel",
-        dimensions=("instrument",),
-        storageClass="StructuredDataDict",
-        doc="Static pretrained model for the RBClassifier.",
-
-        lookupFunction=lookupFunction,
-    )
-
     # Outputs
     classifications = lsst.pipe.base.connectionTypes.Output(
         doc="Catalog of real/bogus classifications for each diaSource, "
@@ -80,6 +69,32 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         storageClass="Catalog",
         name="{fakesType}{coaddName}RealBogusSources",
     )
+
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+
+        # Only if the modelPackageStorageMode config is set to "butler-hybrid"
+        # do we need to add the pretrainedModel as a prerequisite input to the
+        # task. But we also need it to be defined here, so we have access to
+        # the instance's config.
+        if config.modelPackageStorageMode == "butler-hybrid":
+            self.pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
+                name="pretrainedModel",
+                dimensions=("instrument",),
+                storageClass="StructuredDataDict",
+                doc="Static pretrained model for the RBClassifier.",
+                # Below, use a lambda function, which passes all the default
+                # parameters, plus one additional parameter, "config".
+                lookupFunction=lambda dataSetType, registry, dataId, collections: \
+                StorageAdapterButlerHybrid.lookupFunction(
+                    self.config,
+                    dataSetType,
+                    registry,
+                    dataId,
+                    collections
+                )
+            )
+            self.prerequisiteInputs.add("pretrainedModel")
 
 
 class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections):
@@ -92,6 +107,7 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         doc=("A string that indicates _where_ and _how_ the model package is stored."),
         allowed={'local': 'packages stored in the meas_transiNet repository',
                  'neighbor': 'packages stored in the rbClassifier_data repository',
+                 'butler-hybrid': 'pretrained weights in the Butler, other components stored _local_ly',
                  },
         default='neighbor',
     )
@@ -112,11 +128,18 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName,
-                                                                   self.config.modelPackageStorageMode)
-
     @timeMethod
-    def run(self, template, science, difference, diaSources, pretrainedModel):
+    def run(self, template, science, difference, diaSources, pretrainedModel=None):
+
+        # Create the TransiNet interface object.
+        # Note: assuming each quanta creates one instance of this task, this is
+        # a proper place for doing this since loading of the model is run only
+        # once. However, if in the future we come up with a design in which one
+        # task instance is used for multiple quanta, this will need to be moved
+        # somewhere else -- e.g. to the __init__ method, or even to runQuantum.
+        self.butler_loaded_weights = pretrainedModel  # This will be used by the interface
+        self.interface = rbTransiNetInterface.RBTransiNetInterface(self)
+
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
         self.log.info("Extracted %d cutouts.", len(cutouts))
         scores = self.interface.infer(cutouts)
@@ -134,7 +157,6 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
 
     def runQuantum(self, butlerQC, inputRefs, outputRefs):
         inputs = butlerQC.get(inputRefs)
-        print(">>>>>>>>> Here you can have your own functionality")
         outputs = self.run(**inputs)
         butlerQC.put(outputs, outputRefs)
 
