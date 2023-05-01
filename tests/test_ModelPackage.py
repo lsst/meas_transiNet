@@ -234,3 +234,16 @@ class TestModelPackageNeighbor(unittest.TestCase):
         # of input channels.
         self.assertEqual(len(model_package.get_input_scale_factors()),
                          model_package.get_model_input_shape()[2])
+
+
+class MemoryTester(lsst.utils.tests.MemoryTestCase):
+    pass
+
+
+def setup_module(module):
+    lsst.utils.tests.init()
+
+
+if __name__ == "__main__":
+    lsst.utils.tests.init()
+    unittest.main()
