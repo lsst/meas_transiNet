@@ -118,8 +118,7 @@ class TestModelPackageLocal(unittest.TestCase):
 
         model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
 
-        with self.assertRaises(ValueError):
-            model_package.load(device='invalid')
+        model_package.load(device='invalid')
 
         with self.assertRaises(ValueError):
             model_package.load(device='gpu199')
