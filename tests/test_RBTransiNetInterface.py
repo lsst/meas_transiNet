@@ -26,15 +26,25 @@ import numpy as np
 from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 
-class TestOneCutout(unittest.TestCase):
+class TestInference(unittest.TestCase):
     def setUp(self):
         self.interface = RBTransiNetInterface("dummy", "local")
 
-    def test_infer_empty(self):
-        """Test running infer on images containing all zeros.
+    def test_infer_single_empty(self):
+        """Test running infer on a single blank triplet.
         """
         data = np.zeros((256, 256), dtype=np.single)
         inputs = CutoutInputs(science=data, difference=data, template=data)
         result = self.interface.infer([inputs])
         self.assertTupleEqual(result.shape, (1,))
         self.assertAlmostEqual(result[0], 0.5011908)  # Empricial meaningless value spit by this very model
+
+    def test_infer_many(self):
+        """Test running infer on a large number of images,
+        to make sure partitioning to batches works.
+        """
+        data = np.zeros((256, 256), dtype=np.single)
+        inputs = [CutoutInputs(science=data, difference=data, template=data) for _ in range(100)]
+        result = self.interface.infer(inputs)
+        self.assertTupleEqual(result.shape, (100,))
+        self.assertAlmostEqual(result[0], 0.5011908)
