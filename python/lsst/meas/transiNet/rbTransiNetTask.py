@@ -104,8 +104,9 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
 
     def run(self, template, science, difference, diaSources):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
+        self.log.info("Extracted %d cutouts.", len(cutouts))
         scores = self.interface.infer(cutouts)
-
+        self.log.info("Scored %d cutouts.", len(scores))
         schema = lsst.afw.table.Schema()
         schema.addField(diaSources.schema["id"].asField())
         schema.addField("score", doc="real/bogus score of this source", type=float)
