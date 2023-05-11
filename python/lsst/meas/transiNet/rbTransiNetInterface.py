@@ -72,7 +72,7 @@ class RBTransiNetInterface:
         self.model.eval()
 
     def input_to_batches(self, inputs, batchSize):
-        """Convert a list of inputs to batches of inputs.
+        """Convert a list of inputs to a generator of batches.
 
         Parameters
         ----------
@@ -81,11 +81,11 @@ class RBTransiNetInterface:
 
         Returns
         -------
-        batches : `list` [`list` [`CutoutInputs`]]
-            List of batches of inputs.
+        batches : `generator`
+            Generator of batches of inputs.
         """
-        batches = [inputs[i:i + batchSize] for i in range(0, len(inputs), batchSize)]
-        return batches
+        for i in range(0, len(inputs), batchSize):
+            yield inputs[i:i + batchSize]
 
     def prepare_input(self, inputs):
         """
