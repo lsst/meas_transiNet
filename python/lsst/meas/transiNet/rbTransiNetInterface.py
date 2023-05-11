@@ -71,6 +71,22 @@ class RBTransiNetInterface:
         # Put the model in evaluation mode instead of training model.
         self.model.eval()
 
+    def input_to_batches(self, inputs, batchSize):
+        """Convert a list of inputs to batches of inputs.
+
+        Parameters
+        ----------
+        inputs : `list` [`CutoutInputs`]
+            Inputs to be scored.
+
+        Returns
+        -------
+        batches : `list` [`list` [`CutoutInputs`]]
+            List of batches of inputs.
+        """
+        batches = [inputs[i:i + batchSize] for i in range(0, len(inputs), batchSize)]
+        return batches
+
     def prepare_input(self, inputs):
         """
         Convert inputs from numpy arrays, etc. to a torch.tensor blob.
@@ -103,8 +119,8 @@ class RBTransiNetInterface:
 
             labelsList.append(inp.label)
 
-        torchBlob = torch.stack(cutoutsList)
-        return torchBlob, labelsList
+        blob = torch.stack(cutoutsList)
+        return blob, labelsList
 
     def infer(self, inputs):
         """Return the score of this cutout.
@@ -119,9 +135,27 @@ class RBTransiNetInterface:
         scores : `numpy.array`
             Float scores for each element of ``inputs``.
         """
-        blob, labels = self.prepare_input(inputs)
-        result = self.model(blob)
-        scores = torch.sigmoid(result)
-        npyScores = scores.detach().numpy().ravel()
 
+        # Convert the inputs to batches.
+        # TODO: The batch size is set to 64 for now. Later when
+        # deploying parallel instances of the task, memory limits
+        # should be taken into account, if necessary.
+        batches = self.input_to_batches(inputs, batchSize=64)
+
+        # Loop over the batches
+        for i, batch in enumerate(batches):
+            torchBlob, labelsList = self.prepare_input(batch)
+
+            # Run the model
+            with torch.no_grad():
+                output_ = self.model(torchBlob)
+            output = torch.sigmoid(output_)
+
+            # And append the results to the list
+            if i == 0:
+                scores = output
+            else:
+                scores = torch.cat((scores, output.cpu()), dim=0)
+
+        npyScores = scores.detach().numpy().ravel()
         return npyScores
