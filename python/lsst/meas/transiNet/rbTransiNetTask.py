@@ -24,6 +24,7 @@ __all__ = ["RBTransiNetTask", "RBTransiNetConfig"]
 import lsst.geom
 import lsst.pex.config
 import lsst.pipe.base
+from lsst.utils.timer import timeMethod
 import numpy as np
 
 from . import rbTransiNetInterface
@@ -102,6 +103,7 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName,
                                                                    self.config.modelPackageStorageMode)
 
+    @timeMethod
     def run(self, template, science, difference, diaSources):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
         self.log.info("Extracted %d cutouts.", len(cutouts))
