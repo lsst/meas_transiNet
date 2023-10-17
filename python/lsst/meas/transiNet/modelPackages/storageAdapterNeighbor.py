@@ -35,7 +35,10 @@ class StorageAdapterNeighbor(StorageAdapterBase):
         try:
             base_path = os.environ['RBCLASSIFIER_DATA_DIR']
         except KeyError:
-            raise RuntimeError("The environment variable RBCLASSIFIER_DATA_DIR is not set.")
+            raise RuntimeError("Cannot find the lsst-dm/rbClassifier_data package; "
+                               "is it downloaded and set up?\n"
+                               "See https://pipelines.lsst.io/v/daily/modules/lsst.ap.verify/running.html "
+                               "for details on setting up packages from GitHub.")
 
         return os.path.join(base_path, 'model_packages')
 
