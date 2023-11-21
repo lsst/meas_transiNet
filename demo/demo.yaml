@@ -15,7 +15,7 @@ imports:
    
 tasks:
   rbClassify:
-    class: lsst.meas.transiNet.TransiNetTask
+    class: lsst.meas.transiNet.RBTransiNetTask
     config:
       modelPackageName: 'dummy'
       modelPackageStorageMode: 'butler-hybrid'

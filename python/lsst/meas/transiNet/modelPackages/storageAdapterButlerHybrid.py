@@ -2,37 +2,10 @@ import os
 import glob
 
 from .storageAdapterBase import StorageAdapterBase
-from lsst.daf.butler import Formatter
 
 import torch
 
-__all__ = ["StorageAdapterButlerHybrid", "BinaryFormatter", "PytorchCheckpointFormatter"]
-
-
-class BinaryFormatter(Formatter):
-    """Formatter for binary files.
-    """
-    extension = ".tar"
-
-    def read(self, component=None):
-        with open(self.fileDescriptor.location.path, "rb") as f:
-            return f.read()
-
-    def write(self, inMemoryDataset):
-        with open(self.fileDescriptor.location.path, "wb") as f:
-            f.write(inMemoryDataset)
-
-
-class PytorchCheckpointFormatter(Formatter):
-    """Formatter for Pytorch Checkpoint files.
-    """
-    extension = ".tar"
-
-    def read(self, component=None):
-        return torch.load(self.fileDescriptor.location.path)
-
-    def write(self, inMemoryDataset):
-        torch.save(inMemoryDataset, self.fileDescriptor.location.path)
+__all__ = ["StorageAdapterButlerHybrid"]
 
 
 class StorageAdapterButlerHybrid(StorageAdapterBase):
