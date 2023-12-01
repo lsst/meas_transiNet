@@ -37,7 +37,7 @@ class NNModelPackage:
     weights.
     """
 
-    def __init__(self, model_package_name, package_storage_mode, preloaded_weights=None):
+    def __init__(self, model_package_name, package_storage_mode, **kwargs):
         # Validate passed arguments.
         if package_storage_mode not in StorageAdapterFactory.storageAdapterClasses.keys():
             raise ValueError("Unsupported storage mode: %s" % package_storage_mode)
@@ -47,15 +47,10 @@ class NNModelPackage:
         self.model_package_name = model_package_name
         self.package_storage_mode = package_storage_mode
 
-        # Pass the prelaoded weights to the factory, only IFF it is not
-        # None.
-        if preloaded_weights is not None:
-                self.adapter = StorageAdapterFactory.create(self.model_package_name,
-                                                            self.package_storage_mode,
-                                                            preloaded_weights=preloaded_weights)
-        else:
-                self.adapter = StorageAdapterFactory.create(self.model_package_name,
-                                                            self.package_storage_mode)
+        self.adapter = StorageAdapterFactory.create(self.model_package_name,
+                                                    self.package_storage_mode,
+                                                    **kwargs)
+
         self.metadata = self.adapter.load_metadata()
 
     def load(self, device):
@@ -80,12 +75,19 @@ class NNModelPackage:
         if device not in ['cpu'] + ['cuda:%d' % i for i in range(torch.cuda.device_count())]:
             raise ValueError("Invalid device: %s" % device)
 
-        # Load various components based on the storage mode
-        model = self.adapter.load_arch(device)
-        network_data = self.adapter.load_weights(device)
+        # Load various components.
+        # Note that because of the way the StorageAdapterButler works,
+        # the model architecture and the pretrained weights are loaded
+        # into the cpu memory, and only then moved to the target device.
+        model = self.adapter.load_arch(device='cpu')
+        network_data = self.adapter.load_weights(device='cpu')
 
         # Load pretrained weights into model
         model.load_state_dict(network_data['state_dict'], strict=True)
+
+        # Move model to the specified device, if it is not already there.
+        if device != 'cpu':
+            model = model.to(device)
 
         return model
 

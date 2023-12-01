@@ -70,7 +70,7 @@ class RBTransiNetInterface:
         """
         model_package = NNModelPackage(model_package_name=self.model_package_name,
                                        package_storage_mode=self.package_storage_mode,
-                                       preloaded_weights=self.task.butler_loaded_weights)
+                                       butler_loaded_package=self.task.butler_loaded_package)
         self.model = model_package.load(self.device)
 
         # Put the model in evaluation mode instead of training model.

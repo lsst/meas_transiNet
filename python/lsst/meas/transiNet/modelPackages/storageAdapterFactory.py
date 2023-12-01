@@ -52,6 +52,9 @@ class StorageAdapterFactory:
         if storageMode not in cls.storageAdapterClasses:
             raise ValueError('Invalid storage mode: ' + storageMode)
 
+        # Drop any None-valued kwargs.
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         # Create and return the storage adapter.
         storageAdapter = cls.storageAdapterClasses[storageMode](modelPackageName, **kwargs)
         return storageAdapter

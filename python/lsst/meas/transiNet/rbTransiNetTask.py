@@ -79,9 +79,9 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         # the instance's config.
         if config.modelPackageStorageMode == "butler":
             self.pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
-                name="pretrainedModel",
-                dimensions=("instrument",),
-                storageClass="StructuredDataDict",
+                name=StorageAdapterButler.dataset_type_name,
+                dimensions=(),
+                storageClass="ModelPackage",
                 doc="Static pretrained model for the RBClassifier.",
                 # Below, use a lambda function, which passes all the default
                 # parameters, plus one additional parameter, "config".
@@ -128,6 +128,8 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        self.butler_loaded_package = None
+
     @timeMethod
     def run(self, template, science, difference, diaSources, pretrainedModel=None):
 
@@ -137,7 +139,7 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         # once. However, if in the future we come up with a design in which one
         # task instance is used for multiple quanta, this will need to be moved
         # somewhere else -- e.g. to the __init__ method, or even to runQuantum.
-        self.butler_loaded_weights = pretrainedModel  # This will be used by the interface
+        self.butler_loaded_package = pretrainedModel  # This will be used by the interface
         self.interface = rbTransiNetInterface.RBTransiNetInterface(self)
 
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
