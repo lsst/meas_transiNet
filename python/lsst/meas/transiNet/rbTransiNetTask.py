@@ -28,7 +28,7 @@ from lsst.utils.timer import timeMethod
 import numpy as np
 
 from . import rbTransiNetInterface
-from lsst.meas.transiNet.modelPackages.storageAdapterButlerHybrid import StorageAdapterButlerHybrid
+from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
 
 
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
@@ -73,11 +73,11 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
     def __init__(self, *, config=None):
         super().__init__(config=config)
 
-        # Only if the modelPackageStorageMode config is set to "butler-hybrid"
+        # Only if the modelPackageStorageMode config is set to "butler"
         # do we need to add the pretrainedModel as a prerequisite input to the
         # task. But we also need it to be defined here, so we have access to
         # the instance's config.
-        if config.modelPackageStorageMode == "butler-hybrid":
+        if config.modelPackageStorageMode == "butler":
             self.pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
                 name="pretrainedModel",
                 dimensions=("instrument",),
@@ -86,7 +86,7 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
                 # Below, use a lambda function, which passes all the default
                 # parameters, plus one additional parameter, "config".
                 lookupFunction=lambda dataSetType, registry, dataId, collections: \
-                StorageAdapterButlerHybrid.lookupFunction(
+                StorageAdapterButler.lookupFunction(
                     self.config,
                     dataSetType,
                     registry,
@@ -107,7 +107,7 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         doc=("A string that indicates _where_ and _how_ the model package is stored."),
         allowed={'local': 'packages stored in the meas_transiNet repository',
                  'neighbor': 'packages stored in the rbClassifier_data repository',
-                 'butler-hybrid': 'pretrained weights in the Butler, other components stored _local_ly',
+                 'butler': 'packages stored in the butler repository',
                  },
         default='neighbor',
     )

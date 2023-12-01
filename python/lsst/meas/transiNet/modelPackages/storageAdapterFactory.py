@@ -1,6 +1,6 @@
 from .storageAdapterLocal import StorageAdapterLocal
 from .storageAdapterNeighbor import StorageAdapterNeighbor
-from .storageAdapterButlerHybrid import StorageAdapterButlerHybrid
+from .storageAdapterButler import StorageAdapterButler
 
 
 class StorageAdapterFactory:
@@ -22,7 +22,7 @@ class StorageAdapterFactory:
     storageAdapterClasses = {
         'local': StorageAdapterLocal,
         'neighbor': StorageAdapterNeighbor,
-        'butler-hybrid': StorageAdapterButlerHybrid,
+        'butler': StorageAdapterButler,
     }
 
     @classmethod
