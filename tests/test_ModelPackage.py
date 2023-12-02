@@ -35,6 +35,23 @@ except LookupError:
     neighborDirectory = None
 
 
+
+def sanity_check_dummy_model(test, model):
+    weights = next(model.parameters())
+
+    # Test shape of loaded weights.
+    test.assertTupleEqual(weights.shape, (16, 3, 3, 3))
+
+    # Test weight values.
+    # Only test a single tensor, as the probability of randomly having
+    # matching weights "only" in a single tensor is extremely low.
+    torch.testing.assert_close(weights[0][0],
+                               torch.tensor([[0.14145353, -0.10257456, 0.17189537],
+                                             [-0.03069756, -0.1093155, 0.15207087],
+                                             [0.06509985, 0.11900973, -0.16013929]]),
+                               rtol=1e-8, atol=1e-8)
+
+
 class TestModelPackageLocal(unittest.TestCase):
     def setUp(self):
         self.model_package_name = 'dummy'
@@ -45,20 +62,7 @@ class TestModelPackageLocal(unittest.TestCase):
         """
         model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
         model = model_package.load(device='cpu')
-
-        weights = next(model.parameters())
-
-        # Test shape of loaded weights.
-        self.assertTupleEqual(weights.shape, (16, 3, 3, 3))
-
-        # Test weight values.
-        # Only test a single tensor, as the probability of randomly having
-        # matching weights "only" in a single tensor is extremely low.
-        torch.testing.assert_close(weights[0][0],
-                                   torch.tensor([[0.14145353, -0.10257456, 0.17189537],
-                                                 [-0.03069756, -0.1093155, 0.15207087],
-                                                 [0.06509985, 0.11900973, -0.16013929]]),
-                                   rtol=1e-8, atol=1e-8)
+        sanity_check_dummy_model(self, model)
 
     def test_arch_weights_mismatch(self):
         """Test loading of a model package with mismatching architecture and
@@ -184,8 +188,6 @@ class TestModelPackageNeighbor(unittest.TestCase):
         model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
         model = model_package.load(device='cpu')
 
-        weights = next(model.parameters())
-
         # test to make sure the model package is loading from the
         # neighbor repository.
         #
@@ -194,15 +196,7 @@ class TestModelPackageNeighbor(unittest.TestCase):
         self.assertTrue(model_package.adapter.checkpoint_filename.startswith(
             lsst.utils.getPackageDir("rbClassifier_data")))
 
-        # test shape of loaded weights
-        self.assertTupleEqual(weights.shape, (16, 3, 3, 3))
-
-        # test weight values
-        torch.testing.assert_close(weights[0][0],
-                                   torch.tensor([[0.14145353, -0.10257456, 0.17189537],
-                                                 [-0.03069756, -0.1093155, 0.15207087],
-                                                 [0.06509985, 0.11900973, -0.16013929]]),
-                                   rtol=1e-8, atol=1e-8)
+        sanity_check_dummy_model(self, model)
 
     def test_metadata(self):
         """Test loading of metadata
