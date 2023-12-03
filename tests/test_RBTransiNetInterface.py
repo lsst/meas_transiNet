@@ -34,7 +34,6 @@ class TestInference(unittest.TestCase):
         config = RBTransiNetTask.ConfigClass()
         config.modelPackageName = "dummy"
         config.modelPackageStorageMode = "local"
-        self.task.butler_loaded_weights = None  # Because in normal cases it's set in run().
         self.task = RBTransiNetTask(config=config)
         self.interface = RBTransiNetInterface(self.task)
 

@@ -31,7 +31,7 @@ from lsst.meas.transiNet import RBTransiNetTask
 
 
 class TestRBTransiNetTask(lsst.utils.tests.TestCase):
-    def setUp(self):
+    def create_sample_datasets(self):
         bbox = Box2I(Point2I(0, 0), Point2I(400, 400))
         dataset = lsst.meas.base.tests.TestDataset(bbox)
         dataset.addSource(5000, Point2D(50, 50.))
@@ -41,6 +41,10 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
+    def setUp(self):
+        self.create_sample_datasets()
+
+        # Task configuration
         self.config = RBTransiNetTask.ConfigClass()
         self.config.modelPackageName = "dummy"
         self.config.modelPackageStorageMode = "local"
@@ -95,7 +99,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
     def test_run(self):
         """Test that run passes an appropriate object to the interface.
         """
-        task = TransiNetTask(config=self.config)
+        task = RBTransiNetTask(config=self.config)
         result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
         self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
         np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
