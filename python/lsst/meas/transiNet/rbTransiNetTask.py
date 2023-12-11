@@ -60,6 +60,12 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         storageClass="SourceCatalog",
         name="{fakesType}{coaddName}Diff_diaSrc",
     )
+    pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
+        doc="Pretrained neural network model (-package) for the RBClassifier.",
+        dimensions=(),
+        storageClass="ModelPackage",
+        name=StorageAdapterButler.dataset_type_name,
+    )
 
     # Outputs
     classifications = lsst.pipe.base.connectionTypes.Output(
@@ -73,32 +79,13 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
     def __init__(self, *, config=None):
         super().__init__(config=config)
 
-        # Only if the modelPackageStorageMode config is set to "butler"
-        # do we need to add the pretrainedModel as a prerequisite input to the
-        # task. But we also need it to be defined here, so we have access to
-        # the instance's config.
-        if config.modelPackageStorageMode == "butler":
-            self.pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
-                name=StorageAdapterButler.dataset_type_name,
-                dimensions=(),
-                storageClass="ModelPackage",
-                doc="Static pretrained model for the RBClassifier.",
-                # Below, use a lambda function, which passes all the default
-                # parameters, plus one additional parameter, "config".
-                lookupFunction=lambda dataSetType, registry, dataId, collections: \
-                StorageAdapterButler.lookupFunction(
-                    self.config,
-                    dataSetType,
-                    registry,
-                    dataId,
-                    collections
-                )
-            )
-            self.prerequisiteInputs.add("pretrainedModel")
+        if self.config.modelPackageStorageMode != "butler":
+            del self.pretrainedModel
 
 
 class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections):
     modelPackageName = lsst.pex.config.Field(
+        optional=True,
         dtype=str,
         doc=("A unique identifier of a model package. ")
     )
