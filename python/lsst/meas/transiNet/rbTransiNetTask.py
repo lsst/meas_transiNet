@@ -63,7 +63,7 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
     pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
         doc="Pretrained neural network model (-package) for the RBClassifier.",
         dimensions=(),
-        storageClass="ModelPackage",
+        storageClass="NNModelPackagePayload",
         name=StorageAdapterButler.dataset_type_name,
     )
 

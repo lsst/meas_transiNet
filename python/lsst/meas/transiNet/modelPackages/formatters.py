@@ -1,9 +1,11 @@
 from lsst.daf.butler import Formatter
 import torch
 from io import BytesIO
-from . import utils
+#from . import utils
+import dataclasses
 
-__all__ = ["PytorchCheckpointFormatter", "PytorchCheckpointFormatter"]
+__all__ = ["PytorchCheckpointFormatter", "PytorchCheckpointFormatter",
+           "NNModelPackageFormatter", "NNModelPackagePayload"]
 
 
 class PytorchCheckpointFormatter(Formatter):
@@ -41,15 +43,30 @@ class PythonFileFormatter(Formatter):
         path = self.fileDescriptor.location.path
         self.writeFile(path, inMemoryDataset)
 
-class BinaryFormatter(Formatter):
-    """Formatter for binary files.
+class NNModelPackagePayload():
+    """ A thin wrapper around the payload of a NNModelPackageFormatter,
+    which simply carries an in-memory file between the formatter and the
+    storage adapter of model pacakges.
     """
-    extension = ".bin"
+    def __init__(self):
+        self.bytes = BytesIO()
+
+class NNModelPackageFormatter(Formatter):
+    """Formatter for NN model packages.
+    """
+    extension = ".zip"
 
     def read(self, component=None):
+        payload = NNModelPackagePayload()
         with open(self.fileDescriptor.location.path, "rb") as f:
-            return BytesIO(f.read())
+            payload.bytes = BytesIO(f.read())
+        return payload
 
     def write(self, inMemoryDataset):
         with open(self.fileDescriptor.location.path, "wb") as f:
-            f.write(inMemoryDataset.getvalue())
+            f.write(inMemoryDataset.bytes.getvalue())
+            print("Wrote model package to", self.fileDescriptor.location.path)
+
+
+# payload = NNModelPackagePayload
+# payload.bytes = BytesIO(b"hello")
