@@ -104,6 +104,17 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         default=256,
     )
 
+    def validate(self):
+        # if we are in the butler mode, the user should not set
+        # a modelPackageName as a config field.
+        if self.modelPackageStorageMode == "butler":
+            if self.modelPackageName is not None:
+                raise ValueError("In a _real_ run of a pipeline when the "
+                                 "modelPackageStorageMode is 'butler', "
+                                 "the modelPackageName cannot be specified "
+                                 "as a config field. Pass it as a collection"
+                                 "name in the command-line instead.")
+
 
 class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     """Task for running TransiNet real/bogus classification on the output of

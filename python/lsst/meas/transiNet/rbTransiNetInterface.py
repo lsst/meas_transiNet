@@ -49,7 +49,7 @@ class RBTransiNetInterface:
     Parameters
     ----------
     task : `lsst.meas.transiNet.RBTransiNetTask`
-        The task that is using this interface: the 'left side' of the interface.
+        The task that is using this interface: the 'left side'.
     model_package_name : `str`
         Name of the model package to load.
     package_storage_mode : {'local', 'neighbor'}
@@ -60,7 +60,11 @@ class RBTransiNetInterface:
 
     def __init__(self, task, device='cpu'):
         self.task = task
-        self.model_package_name = task.config.modelPackageName
+
+        # in case the model package name is not set at this stage, it is not
+        # needed (e.g. in butler mode).
+        self.model_package_name = task.config.modelPackageName or 'N/A'
+
         self.package_storage_mode = task.config.modelPackageStorageMode
         self.device = device
         self.init_model()
@@ -68,6 +72,11 @@ class RBTransiNetInterface:
     def init_model(self):
         """Create and initialize an NN model
         """
+
+        if self.package_storage_mode == 'butler' and self.task.butler_loaded_package is None:
+            raise RuntimeError("RBTransiNetInterface is trying to load a butler-mode NN model package, "
+                               "but the RBTransiNetTask has not passed down a preloaded payload.")
+
         model_package = NNModelPackage(model_package_name=self.model_package_name,
                                        package_storage_mode=self.package_storage_mode,
                                        butler_loaded_package=self.task.butler_loaded_package)
