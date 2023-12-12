@@ -6,7 +6,6 @@ from . import utils
 import torch
 import zipfile
 import io
-import os
 import yaml
 
 __all__ = ["StorageAdapterButler"]
@@ -70,7 +69,7 @@ class StorageAdapterButler(StorageAdapterBase):
             The instance to create a new instance from.
         """
 
-        instance = cls(model_package_name = use_name or other.model_package_name)
+        instance = cls(model_package_name=use_name or other.model_package_name)
 
         if hasattr(other, 'model_file'):
             instance.model_file = other.model_file
@@ -132,7 +131,7 @@ class StorageAdapterButler(StorageAdapterBase):
         butler repository is already done, which is the "normal" case.
         """
 
-        # If we have already loaded the package, there's nothing left to do here.
+        # If we have already loaded the package, there's nothing left to do.
         if self.model_file is not None:
             return
 
@@ -142,7 +141,7 @@ class StorageAdapterButler(StorageAdapterBase):
 
         # Fetch the model package from the butler repository.
         results = self.butler.registry.queryDatasets(StorageAdapterButler.dataset_type_name,
-                                                     collections=f'{StorageAdapterButler.packages_parent_collection}/{self.model_package_name}')
+                                                     collections=f'{StorageAdapterButler.packages_parent_collection}/{self.model_package_name}')  # noqa: E501
         payload = self.butler.get(list(results)[0])
         self.from_payload(payload)
 
@@ -246,13 +245,13 @@ class StorageAdapterButler(StorageAdapterBase):
         # Create the dataset type (and register it, just in case).
         data_id = {}
         dataset_type = DatasetType(StorageAdapterButler.dataset_type_name,
-                               dimensions=[],
-                               storageClass="NNModelPackagePayload",
-                               universe=butler.registry.dimensions)
+                                   dimensions=[],
+                                   storageClass="NNModelPackagePayload",
+                                   universe=butler.registry.dimensions)
 
         # Register the dataset type.
         def register_dataset_type(butler, dataset_type_name, dataset_type):
-            try: # Do nothing if the dataset type is already registered
+            try:  # Do nothing if the dataset type is already registered
                 butler.registry.getDatasetType(dataset_type_name)
             except KeyError:
                 butler.registry.registerDatasetType(dataset_type)
@@ -263,4 +262,4 @@ class StorageAdapterButler(StorageAdapterBase):
         butler.put(payload,
                    dataset_type,
                    data_id,
-                   run = run_collection)
+                   run=run_collection)

@@ -38,7 +38,6 @@ except LookupError:
     neighborDirectory = None
 
 
-
 def sanity_check_dummy_model(test, model):
     weights = next(model.parameters())
 

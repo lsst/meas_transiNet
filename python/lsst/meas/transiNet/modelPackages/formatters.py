@@ -1,8 +1,7 @@
 from lsst.daf.butler import Formatter
 import torch
 from io import BytesIO
-#from . import utils
-import dataclasses
+from . import utils
 
 __all__ = ["PytorchCheckpointFormatter", "PytorchCheckpointFormatter",
            "NNModelPackageFormatter", "NNModelPackagePayload"]
@@ -18,6 +17,7 @@ class PytorchCheckpointFormatter(Formatter):
 
     def write(self, inMemoryDataset):
         torch.save(inMemoryDataset, self.fileDescriptor.location.path)
+
 
 class PythonFileFormatter(Formatter):
     """Formatter for Python files.
@@ -43,6 +43,7 @@ class PythonFileFormatter(Formatter):
         path = self.fileDescriptor.location.path
         self.writeFile(path, inMemoryDataset)
 
+
 class NNModelPackagePayload():
     """ A thin wrapper around the payload of a NNModelPackageFormatter,
     which simply carries an in-memory file between the formatter and the
@@ -50,6 +51,7 @@ class NNModelPackagePayload():
     """
     def __init__(self):
         self.bytes = BytesIO()
+
 
 class NNModelPackageFormatter(Formatter):
     """Formatter for NN model packages.

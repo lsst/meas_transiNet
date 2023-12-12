@@ -27,6 +27,7 @@ import importlib.machinery
 import importlib.util
 import torch.nn
 
+
 def load_module_from_memory(file_like_object, name='model'):
     """Load a module from the specified file-like object and return the module object.
 
@@ -62,6 +63,7 @@ def load_module_from_memory(file_like_object, name='model'):
     loader.exec_module(module)
 
     return module
+
 
 def load_module_from_file(path, name='model'):
     """Load a module from the specified path and return the module object.
@@ -105,6 +107,7 @@ def import_model_from_module(module):
         raise ImportError(f"Loaded class {model}, from {module}, is not a pytorch neural network module.")
 
     return model()
+
 
 def import_model(path):
     """Import a pytorch neural network architecture from the specified path.

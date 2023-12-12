@@ -3,8 +3,6 @@ import glob
 
 from .storageAdapterBase import StorageAdapterBase
 
-import torch
-
 __all__ = ["StorageAdapterButlerHybrid"]
 
 
