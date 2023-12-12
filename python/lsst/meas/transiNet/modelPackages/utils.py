@@ -29,7 +29,7 @@ import torch.nn
 
 
 def load_module_from_memory(file_like_object, name='model'):
-    """Load a module from the specified file-like object and return the module object.
+    """Load a module from the specified file-like object.
 
     Parameters
     ----------

@@ -14,14 +14,14 @@ __all__ = ["StorageAdapterButler"]
 class StorageAdapterButler(StorageAdapterBase):
     """ An adapter for interfacing with butler model packages.
 
-    In this mode, all components of a model package  are stored in the
+    In this mode, all components of a model package are stored in the
     a Butler repository.
 
     Parameters
     ----------
     model_package_name : `str`
         The name of the ModelPackage to be loaded.
-    butler : `butler.core.Butler`
+    butler : `lsst.daf.butler.Butler`
         The butler instance used for loading the model package.
         This is used in the "offline" mode, where the model package
         is not preloaded, but is fetched from the butler repository
@@ -192,12 +192,9 @@ class StorageAdapterButler(StorageAdapterBase):
         --------
         load_arch
         """
-
         if device != 'cpu':
             raise RuntimeError('storageAdapterButler only supports loading on CPU')
-
         network_data = torch.load(self.checkpoint_file, map_location=device)
-
         return network_data
 
     def load_metadata(self):
@@ -239,7 +236,7 @@ class StorageAdapterButler(StorageAdapterBase):
             the_name = model_package_name
 
         # Create the destination run collection.
-        run_collection = StorageAdapterButler.packages_parent_collection+"/"+the_name
+        run_collection = f"{StorageAdapterButler.packages_parent_collection}/{the_name}"
         butler.registry.registerRun(run_collection)
 
         # Create the dataset type (and register it, just in case).

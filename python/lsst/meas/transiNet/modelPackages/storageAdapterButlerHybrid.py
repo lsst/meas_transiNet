@@ -7,7 +7,7 @@ __all__ = ["StorageAdapterButlerHybrid"]
 
 
 class StorageAdapterButlerHybrid(StorageAdapterBase):
-    """ An adapter for interfacing with butler-hybrid model packages.
+    """An adapter for interfacing with butler-hybrid model packages.
 
     In this mode, pretrained weights are stored in the Butler repository.
     The model architecture and other components are stored on the disk,
@@ -60,8 +60,7 @@ class StorageAdapterButlerHybrid(StorageAdapterBase):
 
     @staticmethod
     def get_base_path():
-        """
-        Return the base model packages storage path for this mode.
+        """Return the base model packages storage path for this mode.
 
         Note that this is all similar to the 'local' mode, but only the
         weights are stored in the Butler repository. The ModelPackage
@@ -82,8 +81,7 @@ class StorageAdapterButlerHybrid(StorageAdapterBase):
         return os.path.join(base_path, 'model_packages')
 
     def get_filenames(self):
-        """
-        Find and return absolute paths to on-disk components.
+        """Find and return absolute paths to on-disk components.
 
         These is every component, except the weights, which are
         already loaded from the Butler repository.

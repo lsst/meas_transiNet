@@ -42,8 +42,7 @@ class CutoutInputs:
 
 
 class RBTransiNetInterface:
-    """
-    The interface between the LSST AP pipeline and a trained pytorch-based
+    """ The interface between the LSST AP pipeline and a trained pytorch-based
     RBTransiNet neural network model.
 
     Parameters
@@ -102,8 +101,7 @@ class RBTransiNetInterface:
             yield inputs[i:i + batchSize]
 
     def prepare_input(self, inputs):
-        """
-        Convert inputs from numpy arrays, etc. to a torch.tensor blob.
+        """Convert inputs from numpy arrays, etc. to a torch.tensor blob.
 
         Parameters
         ----------
