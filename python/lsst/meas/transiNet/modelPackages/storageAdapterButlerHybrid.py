@@ -76,7 +76,7 @@ class StorageAdapterButlerHybrid(StorageAdapterBase):
         try:
             base_path = os.environ['MEAS_TRANSINET_DIR']
         except KeyError:
-            raise RuntimeError("The environment variable MEAS_TRANSINET_DIR is not set.")
+            raise RuntimeError("The environment variable MEAS_TRANSINET_DIR is not set.") from None
 
         return os.path.join(base_path, 'model_packages')
 
