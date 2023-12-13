@@ -155,11 +155,6 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
 
         return lsst.pipe.base.Struct(classifications=classifications)
 
-    def runQuantum(self, butlerQC, inputRefs, outputRefs):
-        inputs = butlerQC.get(inputRefs)
-        outputs = self.run(**inputs)
-        butlerQC.put(outputs, outputRefs)
-
     def _make_cutouts(self, template, science, difference, source):
         """Return cutouts of each image centered at the source location.
 
