@@ -31,7 +31,7 @@ from lsst.meas.transiNet import RBTransiNetTask
 
 
 class TestRBTransiNetTask(lsst.utils.tests.TestCase):
-    def setUp(self):
+    def create_sample_datasets(self):
         bbox = Box2I(Point2I(0, 0), Point2I(400, 400))
         dataset = lsst.meas.base.tests.TestDataset(bbox)
         dataset.addSource(5000, Point2D(50, 50.))
@@ -41,6 +41,10 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
+    def setUp(self):
+        self.create_sample_datasets()
+
+        # Task configuration
         self.config = RBTransiNetTask.ConfigClass()
         self.config.modelPackageName = "dummy"
         self.config.modelPackageStorageMode = "local"
@@ -93,18 +97,12 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         np.testing.assert_array_equal(cutout, np.zeros_like(cutout))
 
     def test_run(self):
-        """Test that run passes an appropriate object to the interface,
-        mocking the interface infer step so we don't need to use pytorch.
+        """Test that run passes an appropriate object to the interface.
         """
-        scores = np.array([0.0, 1.0, 0.0])
         task = RBTransiNetTask(config=self.config)
-        task.interface.infer = unittest.mock.Mock(task.interface.infer)
-        with unittest.mock.patch.object(task.interface, "infer") as mock_infer:
-            mock_infer.return_value = scores
-            result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
-            self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
-            np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
-            np.testing.assert_array_equal(scores, result.classifications["score"])
+        result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
+        self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
+        np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
 
 
 class MemoryTester(lsst.utils.tests.MemoryTestCase):

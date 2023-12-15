@@ -23,12 +23,19 @@ import unittest
 
 import numpy as np
 
+from lsst.meas.transiNet import RBTransiNetTask
 from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 
 class TestInference(unittest.TestCase):
     def setUp(self):
-        self.interface = RBTransiNetInterface("dummy", "local")
+
+        # Create a mock TransiNetTask.
+        config = RBTransiNetTask.ConfigClass()
+        config.modelPackageName = "dummy"
+        config.modelPackageStorageMode = "local"
+        self.task = RBTransiNetTask(config=config)
+        self.interface = RBTransiNetInterface(self.task)
 
     def test_infer_single_empty(self):
         """Test running infer on a single blank triplet.

@@ -15,8 +15,8 @@ imports:
    
 tasks:
   rbClassify:
-    class: lsst.meas.transiNet.TransiNetTask
+    class: lsst.meas.transiNet.RBTransiNetTask
     config:
-      modelPackageName: 'dummy'
-      modelPackageStorageMode: 'local'
+      #modelPackageName: 'dummy' #This cannot be used in the butler mode. Use -i {collection_name} instead.
+      modelPackageStorageMode: 'butler'
       connections.coaddName: 'goodSeeing'

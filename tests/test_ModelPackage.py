@@ -23,16 +23,35 @@ import unittest
 import torch
 import os
 import shutil
+import tempfile
 
 from lsst.meas.transiNet.modelPackages.nnModelPackage import NNModelPackage
 from lsst.meas.transiNet.modelPackages.storageAdapterLocal import StorageAdapterLocal
 from lsst.meas.transiNet.modelPackages.storageAdapterNeighbor import StorageAdapterNeighbor
-
+from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
+from lsst.daf.butler import Butler
+from lsst.daf.butler.registry._exceptions import ConflictingDefinitionError
 import lsst.utils
 try:
     neighborDirectory = lsst.utils.getPackageDir("rbClassifier_data")
 except LookupError:
     neighborDirectory = None
+
+
+def sanity_check_dummy_model(test, model):
+    weights = next(model.parameters())
+
+    # Test shape of loaded weights.
+    test.assertTupleEqual(weights.shape, (16, 3, 3, 3))
+
+    # Test weight values.
+    # Only test a single tensor, as the probability of randomly having
+    # matching weights "only" in a single tensor is extremely low.
+    torch.testing.assert_close(weights[0][0],
+                               torch.tensor([[0.14145353, -0.10257456, 0.17189537],
+                                             [-0.03069756, -0.1093155, 0.15207087],
+                                             [0.06509985, 0.11900973, -0.16013929]]),
+                               rtol=1e-8, atol=1e-8)
 
 
 class TestModelPackageLocal(unittest.TestCase):
@@ -45,20 +64,7 @@ class TestModelPackageLocal(unittest.TestCase):
         """
         model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
         model = model_package.load(device='cpu')
-
-        weights = next(model.parameters())
-
-        # Test shape of loaded weights.
-        self.assertTupleEqual(weights.shape, (16, 3, 3, 3))
-
-        # Test weight values.
-        # Only test a single tensor, as the probability of randomly having
-        # matching weights "only" in a single tensor is extremely low.
-        torch.testing.assert_close(weights[0][0],
-                                   torch.tensor([[0.14145353, -0.10257456, 0.17189537],
-                                                 [-0.03069756, -0.1093155, 0.15207087],
-                                                 [0.06509985, 0.11900973, -0.16013929]]),
-                                   rtol=1e-8, atol=1e-8)
+        sanity_check_dummy_model(self, model)
 
     def test_arch_weights_mismatch(self):
         """Test loading of a model package with mismatching architecture and
@@ -184,8 +190,6 @@ class TestModelPackageNeighbor(unittest.TestCase):
         model_package = NNModelPackage(self.model_package_name, self.package_storage_mode)
         model = model_package.load(device='cpu')
 
-        weights = next(model.parameters())
-
         # test to make sure the model package is loading from the
         # neighbor repository.
         #
@@ -194,15 +198,7 @@ class TestModelPackageNeighbor(unittest.TestCase):
         self.assertTrue(model_package.adapter.checkpoint_filename.startswith(
             lsst.utils.getPackageDir("rbClassifier_data")))
 
-        # test shape of loaded weights
-        self.assertTupleEqual(weights.shape, (16, 3, 3, 3))
-
-        # test weight values
-        torch.testing.assert_close(weights[0][0],
-                                   torch.tensor([[0.14145353, -0.10257456, 0.17189537],
-                                                 [-0.03069756, -0.1093155, 0.15207087],
-                                                 [0.06509985, 0.11900973, -0.16013929]]),
-                                   rtol=1e-8, atol=1e-8)
+        sanity_check_dummy_model(self, model)
 
     def test_metadata(self):
         """Test loading of metadata
@@ -236,14 +232,48 @@ class TestModelPackageNeighbor(unittest.TestCase):
                          model_package.get_model_input_shape()[2])
 
 
-class MemoryTester(lsst.utils.tests.MemoryTestCase):
-    pass
+class TestModelPackageButler(unittest.TestCase):
+    def setUp(self):
+        self.model_package_name = 'dummy'
 
+        # Create a dummy butler repository (in a temporary directory).
+        # Note that a test repo using makeTestRepo would not suffice
+        # as we need to test the ingestion of a model package too.
+        self.repo_root = tempfile.mkdtemp(prefix='butler_')
+        Butler.makeRepo(root=self.repo_root)
+        self.butler = Butler(self.repo_root, writeable=True)
 
-def setup_module(module):
-    lsst.utils.tests.init()
+    def tearDown(self):
+        shutil.rmtree(self.repo_root)
 
+    def ingest(self):
+        # Load a local model package, to transfer/ingest to
+        # the butler repository.
+        local_model_package = NNModelPackage('dummy', 'local')
+        StorageAdapterButler.ingest(local_model_package,
+                                    self.butler,
+                                    model_package_name=self.model_package_name)
 
-if __name__ == "__main__":
-    lsst.utils.tests.init()
-    unittest.main()
+    def load_from_butler(self):
+        # Load the model package from the butler repository.
+        model_package = NNModelPackage(model_package_name=self.model_package_name,
+                                       package_storage_mode='butler',
+                                       butler=self.butler)
+        return model_package
+
+    def test_double_ingest(self):
+        """Test whether redundant ingestion of a model package to the butler
+        repository fails as expected.
+        """
+        self.ingest()
+        # assert that the second one raises ConflictingDefinitionError
+        with self.assertRaises(ConflictingDefinitionError):
+            self.ingest()
+
+    def test_ingest_load(self):
+        """Test ingesting and loading of a model package of butler mode
+        """
+        self.ingest()
+        model_package = self.load_from_butler()
+        model = model_package.load(device='cpu')
+        sanity_check_dummy_model(self, model)

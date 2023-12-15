@@ -28,6 +28,7 @@ from lsst.utils.timer import timeMethod
 import numpy as np
 
 from . import rbTransiNetInterface
+from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
 
 
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
@@ -59,6 +60,12 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         storageClass="SourceCatalog",
         name="{fakesType}{coaddName}Diff_diaSrc",
     )
+    pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
+        doc="Pretrained neural network model (-package) for the RBClassifier.",
+        dimensions=(),
+        storageClass="NNModelPackagePayload",
+        name=StorageAdapterButler.dataset_type_name,
+    )
 
     # Outputs
     classifications = lsst.pipe.base.connectionTypes.Output(
@@ -69,9 +76,16 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         name="{fakesType}{coaddName}RealBogusSources",
     )
 
+    def __init__(self, *, config=None):
+        super().__init__(config=config)
+
+        if self.config.modelPackageStorageMode != "butler":
+            del self.pretrainedModel
+
 
 class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections):
     modelPackageName = lsst.pex.config.Field(
+        optional=True,
         dtype=str,
         doc=("A unique identifier of a model package. ")
     )
@@ -80,6 +94,7 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         doc=("A string that indicates _where_ and _how_ the model package is stored."),
         allowed={'local': 'packages stored in the meas_transiNet repository',
                  'neighbor': 'packages stored in the rbClassifier_data repository',
+                 'butler': 'packages stored in the butler repository',
                  },
         default='neighbor',
     )
@@ -88,6 +103,17 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         doc="Width/height of square cutouts to send to classifier.",
         default=256,
     )
+
+    def validate(self):
+        # if we are in the butler mode, the user should not set
+        # a modelPackageName as a config field.
+        if self.modelPackageStorageMode == "butler":
+            if self.modelPackageName is not None:
+                raise ValueError("In a _real_ run of a pipeline when the "
+                                 "modelPackageStorageMode is 'butler', "
+                                 "the modelPackageName cannot be specified "
+                                 "as a config field. Pass it as a collection"
+                                 "name in the command-line instead.")
 
 
 class RBTransiNetTask(lsst.pipe.base.PipelineTask):
@@ -100,11 +126,20 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName,
-                                                                   self.config.modelPackageStorageMode)
+        self.butler_loaded_package = None
 
     @timeMethod
-    def run(self, template, science, difference, diaSources):
+    def run(self, template, science, difference, diaSources, pretrainedModel=None):
+
+        # Create the TransiNet interface object.
+        # Note: assuming each quanta creates one instance of this task, this is
+        # a proper place for doing this since loading of the model is run only
+        # once. However, if in the future we come up with a design in which one
+        # task instance is used for multiple quanta, this will need to be moved
+        # somewhere else -- e.g. to the __init__ method, or even to runQuantum.
+        self.butler_loaded_package = pretrainedModel  # This will be used by the interface
+        self.interface = rbTransiNetInterface.RBTransiNetInterface(self)
+
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
         self.log.info("Extracted %d cutouts.", len(cutouts))
         scores = self.interface.infer(cutouts)

@@ -1,5 +1,6 @@
 from .storageAdapterLocal import StorageAdapterLocal
 from .storageAdapterNeighbor import StorageAdapterNeighbor
+from .storageAdapterButler import StorageAdapterButler
 
 
 class StorageAdapterFactory:
@@ -21,10 +22,11 @@ class StorageAdapterFactory:
     storageAdapterClasses = {
         'local': StorageAdapterLocal,
         'neighbor': StorageAdapterNeighbor,
+        'butler': StorageAdapterButler,
     }
 
     @classmethod
-    def create(cls, modelPackageName, storageMode):
+    def create(cls, modelPackageName, storageMode, **kwargs):
         """ Factory method to create a storage adapter
         based on the storageMode parameter.
 
@@ -34,6 +36,8 @@ class StorageAdapterFactory:
             The name of the model package.
         storageMode : `str`
             The storage mode for the model package.
+        **kwargs
+            Additional keyword arguments to pass to the storage adapter.
 
         Returns
         -------
@@ -48,6 +52,9 @@ class StorageAdapterFactory:
         if storageMode not in cls.storageAdapterClasses:
             raise ValueError('Invalid storage mode: ' + storageMode)
 
+        # Drop any None-valued kwargs.
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
+
         # Create and return the storage adapter.
-        storageAdapter = cls.storageAdapterClasses[storageMode](modelPackageName)
+        storageAdapter = cls.storageAdapterClasses[storageMode](modelPackageName, **kwargs)
         return storageAdapter
