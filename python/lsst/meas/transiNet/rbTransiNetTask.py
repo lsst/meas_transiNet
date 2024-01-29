@@ -58,7 +58,7 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         doc="Detected sources on the difference image.",
         dimensions=("instrument", "visit", "detector"),
         storageClass="SourceCatalog",
-        name="{fakesType}{coaddName}Diff_diaSrc",
+        name="{fakesType}{coaddName}Diff_candidateDiaSrc",
     )
     pretrainedModel = lsst.pipe.base.connectionTypes.PrerequisiteInput(
         doc="Pretrained neural network model (-package) for the RBClassifier.",
