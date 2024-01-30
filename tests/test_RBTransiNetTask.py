@@ -104,6 +104,27 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
         np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
 
+    def test_config_butlerblock(self):
+        config = RBTransiNetTask.ConfigClass()
+        config.modelPackageName = "dummy"
+        config.modelPackageStorageMode = "butler"
+        with self.assertRaises(ValueError):
+            config.validate()
+
+    def test_config_butlerpass_none(self):
+        config = RBTransiNetTask.ConfigClass()
+        config.modelPackageName = None
+        config.modelPackageStorageMode = "butler"
+        # Should not raise
+        config.validate()
+
+    def test_config_butlerblock_empty(self):
+        config = RBTransiNetTask.ConfigClass()
+        config.modelPackageName = ""  # Want *only* None for butler packages
+        config.modelPackageStorageMode = "butler"
+        with self.assertRaises(ValueError):
+            config.validate()
+
 
 class MemoryTester(lsst.utils.tests.MemoryTestCase):
     pass
