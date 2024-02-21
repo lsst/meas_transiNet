@@ -5,31 +5,48 @@ import lsst.utils.tests
 
 from lsst.meas.transiNet import RBTransiNetTask
 import time
-
+import random
+import numpy as np
 
 class ProfileRBTransiNetTask():
     def init(self, nSources):
-        bbox = Box2I(Point2I(0, 0), Point2I(4000, 4000))
-        dataset = lsst.meas.base.tests.TestDataset(bbox)
-
-        # Add random sources to the exposure
-        import random
-        for i in range(nSources):
-            dataset.addSource(5000, Point2D(random.uniform(0, 4000), random.uniform(0, 4000)))
-
-        self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
-
+        self.create_dummy_dataset(nSources)
         self.config = RBTransiNetTask.ConfigClass()
         # self.config.modelPackageName = "dummy"
         # self.config.modelPackageStorageMode = "local"
         self.config.modelPackageName = "rbResnet50-DC2"
         self.config.modelPackageStorageMode = "neighbor"
 
+    def create_dummy_dataset(self, nSources):
+        '''Create a dummy dataset with nSources sources.
+        This creates a dummy catalog and an *empty* exposure.
+        We do not use TestDataset.AddSource() from meas_base since
+        we cannot afford to wait for it to complete -- i.e. it is
+        too slow for our purposes.
+        '''
+        bbox = Box2I(Point2I(0, 0), Point2I(4000, 4000))
+        TD = lsst.meas.base.tests.TestDataset
+        self.catalog = lsst.afw.table.SourceCatalog(TD.makeMinimalSchema())
+        record = self.catalog.addNew()
+
+        for i in range(nSources):
+            record.set(TD.keys["instFlux"], 5000)
+            record.set(TD.keys["instFluxErr"], 0)
+            record.set(TD.keys["centroid"], Point2D(random.uniform(0, bbox.getWidth()), random.uniform(0, bbox.getHeight())))
+            covariance = np.random.normal(0, 0.1, 4).reshape(2, 2)
+            covariance[0, 1] = covariance[1, 0]  # CovarianceMatrixKey assumes symmetric x_y_Cov
+            record.set(TD.keys["centroid_sigma"], covariance.astype(np.float32))
+            record.set(TD.keys["isStar"], True)
+            self.catalog.append(record)
+
+        self.exposure = lsst.afw.image.ExposureF(bbox)
+
     def test_run(self):
         task = RBTransiNetTask(config=self.config)
         task.run(self.exposure, self.exposure, self.exposure, self.catalog)
 
     def profile(self, nSources=50, nTimes=1):
+        # Use timeit to profile the task
         self.init(nSources)
         start = time.time()
         for i in range(nTimes):
@@ -39,13 +56,7 @@ class ProfileRBTransiNetTask():
 
 
 if __name__ == "__main__":
-
+    import sys
     profiler = ProfileRBTransiNetTask()
-    profiler.profile(50)
-
-    # nSources = 500
-    # profiler = ProfileRBTransiNetTask(nSources)
-    # start = time.time()
-    # profiler.test_run()
-    # end = time.time()
-    # print(f"It took {end - start:.2f} seconds to run {nSources} sources.")
+    profiler.profile(nSources=int(sys.argv[1]) if len(sys.argv) > 1 else 50,
+                     nTimes=int(sys.argv[2]) if len(sys.argv) > 2 else 1)
