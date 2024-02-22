@@ -9,13 +9,11 @@ import random
 import numpy as np
 
 class ProfileRBTransiNetTask():
-    def init(self, nSources):
+    def init(self, nSources, modelPackageName="rbResnet50-DC2", modelPackageStorageMode="neighbor"):
         self.create_dummy_dataset(nSources)
         self.config = RBTransiNetTask.ConfigClass()
-        # self.config.modelPackageName = "dummy"
-        # self.config.modelPackageStorageMode = "local"
-        self.config.modelPackageName = "rbResnet50-DC2"
-        self.config.modelPackageStorageMode = "neighbor"
+        self.config.modelPackageName = modelPackageName
+        self.config.modelPackageStorageMode = modelPackageStorageMode
 
     def create_dummy_dataset(self, nSources):
         '''Create a dummy dataset with nSources sources.
@@ -46,13 +44,13 @@ class ProfileRBTransiNetTask():
         task.run(self.exposure, self.exposure, self.exposure, self.catalog)
 
     def profile(self, nSources=50, nTimes=1):
-        # Use timeit to profile the task
-        self.init(nSources)
-        start = time.time()
-        for i in range(nTimes):
-            self.test_run()
-        end = time.time()
-        print("Time per run for %d sources: %f seconds" % (nSources, (end - start) / nTimes))
+        for modelName in ["rbResnet50-DC2", "rbMobileNet"]:
+            self.init(nSources, modelPackageName=modelName)
+            start = time.time()
+            for i in range(nTimes):
+                self.test_run()
+            end = time.time()
+            print(f"Time per run for {nSources} sources and {nTimes} runs with {modelName}: {(end-start)/nTimes:.2f} seconds")
 
 
 if __name__ == "__main__":
