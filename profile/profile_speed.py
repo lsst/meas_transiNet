@@ -9,11 +9,12 @@ import random
 import numpy as np
 
 class ProfileRBTransiNetTask():
-    def init(self, nSources, modelPackageName="rbResnet50-DC2", modelPackageStorageMode="neighbor"):
+    def init(self, nSources, modelPackageName="rbResnet50-DC2", modelPackageStorageMode="neighbor", device="cpu"):
         self.create_dummy_dataset(nSources)
         self.config = RBTransiNetTask.ConfigClass()
         self.config.modelPackageName = modelPackageName
         self.config.modelPackageStorageMode = modelPackageStorageMode
+        self.config.computeDevice = device
 
     def create_dummy_dataset(self, nSources):
         '''Create a dummy dataset with nSources sources.
@@ -44,17 +45,18 @@ class ProfileRBTransiNetTask():
         task.run(self.exposure, self.exposure, self.exposure, self.catalog)
 
     def profile(self, nSources=50, nTimes=1):
-        for modelName in ["rbResnet50-DC2", "rbMobileNet"]:
-            self.init(nSources, modelPackageName=modelName)
-            start = time.time()
-            for i in range(nTimes):
-                self.test_run()
-            end = time.time()
-            print(f"Time per run for {nSources} sources and {nTimes} runs with {modelName}: {(end-start)/nTimes:.2f} seconds")
+        for device in ["cpu", "cuda:0"]:
+            for modelName in ["rbResnet50-DC2", "rbMobileNet"]:
+                self.init(nSources, modelPackageName=modelName, device=device)
+                start = time.time()
+                for i in range(nTimes):
+                    self.test_run()
+                    end = time.time()
+                    print(f"Time per run for {nSources} sources and {nTimes} runs with {modelName} \ton {device}: \t{(end-start)/nTimes:.2f} seconds")
 
 
 if __name__ == "__main__":
     import sys
     profiler = ProfileRBTransiNetTask()
-    profiler.profile(nSources=int(sys.argv[1]) if len(sys.argv) > 1 else 50,
+    profiler.profile(nSources=int(sys.argv[1]) if len(sys.argv) > 1 else 10,
                      nTimes=int(sys.argv[2]) if len(sys.argv) > 2 else 1)

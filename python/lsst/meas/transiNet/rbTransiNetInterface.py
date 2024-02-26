@@ -119,7 +119,7 @@ class RBTransiNetInterface:
 
             labelsList.append(inp.label)
 
-        blob = torch.stack(cutoutsList)
+        blob = torch.stack(cutoutsList).to(self.device)
         return blob, labelsList
 
     def infer(self, inputs):
@@ -155,7 +155,7 @@ class RBTransiNetInterface:
             if i == 0:
                 scores = output
             else:
-                scores = torch.cat((scores, output.cpu()), dim=0)
+                scores = torch.cat((scores, output), dim=0)
 
-        npyScores = scores.detach().numpy().ravel()
+        npyScores = scores.detach().cpu().numpy().ravel()
         return npyScores

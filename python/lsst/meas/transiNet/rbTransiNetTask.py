@@ -87,6 +87,14 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         doc="Width/height of square cutouts to send to classifier.",
         default=256,
     )
+    computeDevice = lsst.pex.config.ChoiceField(
+        dtype=str,
+        doc="Device to use for computation.",
+        allowed={"cpu": "Use the CPU",
+                 "cuda:0": "Use the first CUDA device", # We do not support multiple GPUs per process.
+                 },
+        default="cpu",
+    )
 
 
 class RBTransiNetTask(lsst.pipe.base.PipelineTask):
@@ -99,8 +107,9 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.interface = rbTransiNetInterface.RBTransiNetInterface(self.config.modelPackageName,
-                                                                   self.config.modelPackageStorageMode)
+        self.interface = rbTransiNetInterface.RBTransiNetInterface(model_package_name=self.config.modelPackageName,
+                                                                   package_storage_mode=self.config.modelPackageStorageMode,
+                                                                   device=self.config.computeDevice)
 
     def run(self, template, science, difference, diaSources):
         cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
