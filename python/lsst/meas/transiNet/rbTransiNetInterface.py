@@ -57,7 +57,7 @@ class RBTransiNetInterface:
         Device to load and run the neural network on, e.g. 'cpu' or 'cuda:0'
     """
 
-    def __init__(self, task, device='cpu'):
+    def __init__(self, task, device='cuda:0'):
         self.task = task
 
         # in case the model package name is not set at this stage, it is not
@@ -131,7 +131,7 @@ class RBTransiNetInterface:
 
             labelsList.append(inp.label)
 
-        blob = torch.stack(cutoutsList)
+        blob = torch.stack(cutoutsList).to(self.device)
         return blob, labelsList
 
     def infer(self, inputs):
@@ -167,7 +167,7 @@ class RBTransiNetInterface:
             if i == 0:
                 scores = output
             else:
-                scores = torch.cat((scores, output.cpu()), dim=0)
+                scores = torch.cat((scores, output.cuda()), dim=0)
 
-        npyScores = scores.detach().numpy().ravel()
+        npyScores = scores.detach().cpu().numpy().ravel()
         return npyScores
