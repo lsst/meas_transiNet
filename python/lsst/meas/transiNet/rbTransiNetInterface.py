@@ -115,24 +115,38 @@ class RBTransiNetInterface:
         labels
             Truth labels, concatenated into a single list.
         """
-        cutoutsList = []
-        labelsList = []
+        # cutoutsList = []
+        # labelsList = []
+        # for inp in inputs:
+        #     # Convert each cutout to a torch tensor
+        #     template = torch.from_numpy(inp.template)
+        #     science = torch.from_numpy(inp.science)
+        #     difference = torch.from_numpy(inp.difference)
+
+        #     # Stack the components to create a single blob
+        #     singleBlob = torch.stack((template, science, difference), dim=0)
+
+        #     # And append them to the temporary list
+        #     cutoutsList.append(singleBlob)
+
+        #     labelsList.append(inp.label)
+
+        # blob = torch.stack(cutoutsList)
+        # return blob, labelsList
+        image_tensors = []
+        labels_list = []
+        
         for inp in inputs:
             # Convert each cutout to a torch tensor
-            template = torch.from_numpy(inp.template)
-            science = torch.from_numpy(inp.science)
-            difference = torch.from_numpy(inp.difference)
+            template_tensor = torch.from_numpy(inp.template)
+            science_tensor = torch.from_numpy(inp.science)
+            difference_tensor = torch.from_numpy(inp.difference)
 
-            # Stack the components to create a single blob
-            singleBlob = torch.stack((template, science, difference), dim=0)
+            # Append them to the temporary list
+            image_tensors.extend([template_tensor, science_tensor, difference_tensor])
+            labels_list.extend([inp.label, inp.label, inp.label])  # Assuming label is same for all three images
 
-            # And append them to the temporary list
-            cutoutsList.append(singleBlob)
-
-            labelsList.append(inp.label)
-
-        blob = torch.stack(cutoutsList)
-        return blob, labelsList
+    return image_tensors, labels_list
 
     def infer(self, inputs):
         """Return the score of this cutout.
