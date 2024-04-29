@@ -83,7 +83,7 @@ class NNModelPackage:
         network_data = self.adapter.load_weights(device='cpu')
 
         # Load pretrained weights into model
-        model.load_state_dict(network_data['state_dict'], strict=True)
+        model.load_state_dict(network_data, strict=True)
 
         # Move model to the specified device, if it is not already there.
         if device != 'cpu':

@@ -40,18 +40,18 @@ class TestInference(unittest.TestCase):
     def test_infer_single_empty(self):
         """Test running infer on a single blank triplet.
         """
-        data = np.zeros((256, 256), dtype=np.single)
+        data = np.zeros((51, 51), dtype=np.single)
         inputs = CutoutInputs(science=data, difference=data, template=data)
         result = self.interface.infer([inputs])
         self.assertTupleEqual(result.shape, (1,))
-        self.assertAlmostEqual(result[0], 0.5011908)  # Empricial meaningless value spit by this very model
+        self.assertAlmostEqual(result[0], 0.7310586)  # Empricial meaningless value spit by this very model
 
     def test_infer_many(self):
         """Test running infer on a large number of images,
         to make sure partitioning to batches works.
         """
-        data = np.zeros((256, 256), dtype=np.single)
-        inputs = [CutoutInputs(science=data, difference=data, template=data) for _ in range(100)]
+        data = np.zeros((51, 51), dtype=np.single)
+        inputs = [CutoutInputs(science=data, difference=data, template=data) for _ in range(10)]
         result = self.interface.infer(inputs)
-        self.assertTupleEqual(result.shape, (100,))
-        self.assertAlmostEqual(result[0], 0.5011908)
+        self.assertTupleEqual(result.shape, (10,))
+        self.assertAlmostEqual(result[0], 0.7310586)

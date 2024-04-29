@@ -71,7 +71,6 @@ class RBTransiNetInterface:
     def init_model(self):
         """Create and initialize an NN model
         """
-
         if self.package_storage_mode == 'butler' and self.task.butler_loaded_package is None:
             raise RuntimeError("RBTransiNetInterface is trying to load a butler-mode NN model package, "
                                "but the RBTransiNetTask has not passed down a preloaded payload.")
@@ -133,20 +132,24 @@ class RBTransiNetInterface:
 
         # blob = torch.stack(cutoutsList)
         # return blob, labelsList
-        image_tensors = []
+        template_tensors = []
+        science_tensors = []
+        difference_tensors = []
+
         labels_list = []
         
         for inp in inputs:
             # Convert each cutout to a torch tensor
-            template_tensor = torch.from_numpy(inp.template)
-            science_tensor = torch.from_numpy(inp.science)
-            difference_tensor = torch.from_numpy(inp.difference)
+            template_tensors.append(torch.from_numpy(inp.template))
+            science_tensors.append(torch.from_numpy(inp.science))
+            difference_tensors.append(torch.from_numpy(inp.difference))
+            labels_list.append(inp.label)  # Assuming label is same for all three images
+        
+        template_tensors = torch.stack(template_tensors).unsqueeze(1)
+        science_tensors = torch.stack(science_tensors).unsqueeze(1)
+        difference_tensors = torch.stack(difference_tensors).unsqueeze(1)
 
-            # Append them to the temporary list
-            image_tensors.extend([template_tensor, science_tensor, difference_tensor])
-            labels_list.extend([inp.label, inp.label, inp.label])  # Assuming label is same for all three images
-
-        return image_tensors, labels_list
+        return (template_tensors, science_tensors, difference_tensors), labels_list
 
     def infer(self, inputs):
         """Return the score of this cutout.
@@ -167,14 +170,12 @@ class RBTransiNetInterface:
         # deploying parallel instances of the task, memory limits
         # should be taken into account, if necessary.
         batches = self.input_to_batches(inputs, batchSize=64)
-
         # Loop over the batches
         for i, batch in enumerate(batches):
             torchBlob, labelsList = self.prepare_input(batch)
-
             # Run the model
             with torch.no_grad():
-                output_ = self.model(torchBlob)
+                output_ = self.model(torchBlob[0], torchBlob[1], torchBlob[2])
             output = torch.sigmoid(output_)
 
             # And append the results to the list

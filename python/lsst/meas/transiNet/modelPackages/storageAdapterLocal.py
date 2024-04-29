@@ -63,7 +63,7 @@ class StorageAdapterLocal(StorageAdapterBase):
         # There should be one and only one file named meta*.yaml under the dir.
         try:
             model_filenames = glob.glob(f'{dir_name}/arch*.py')
-            checkpoint_filenames = glob.glob(f'{dir_name}/*.pth.tar')
+            checkpoint_filenames = glob.glob(f'{dir_name}/*.pt')
             metadata_filenames = glob.glob(f'{dir_name}/meta*.yaml')
         except IndexError:
             raise FileNotFoundError("Cannot find model architecture, checkpoint or metadata file.")

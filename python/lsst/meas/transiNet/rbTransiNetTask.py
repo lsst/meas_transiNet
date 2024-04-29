@@ -78,7 +78,6 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
 
     def __init__(self, *, config=None):
         super().__init__(config=config)
-
         if self.config.modelPackageStorageMode != "butler":
             del self.pretrainedModel
 
@@ -101,7 +100,7 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
         doc="Width/height of square cutouts to send to classifier.",
-        default=256,
+        default=51,
     )
 
     def validate(self):

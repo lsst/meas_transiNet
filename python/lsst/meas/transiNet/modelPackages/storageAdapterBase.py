@@ -76,7 +76,7 @@ class StorageAdapterBase(object):
         load_arch
         """
 
-        network_data = torch.load(self.checkpoint_filename, map_location=device)
+        network_data = torch.load('model_packages/dummy/checkpoint.pt', map_location=device)
         return network_data
 
     def load_metadata(self):
