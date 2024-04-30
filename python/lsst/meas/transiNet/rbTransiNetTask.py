@@ -31,22 +31,24 @@ from . import rbTransiNetInterface
 from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
 
 
-class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
-                             dimensions=("instrument", "visit", "detector"),
-                             defaultTemplates={"coaddName": "deep", "fakesType": ""}):
+class RBTransiNetConnections(
+    lsst.pipe.base.PipelineTaskConnections,
+    dimensions=("instrument", "visit", "detector"),
+    defaultTemplates={"coaddName": "deep", "fakesType": ""},
+):
     # NOTE: Do we want the "ready to difference" template, or something
     # earlier? This one is warped, but not PSF-matched.
     template = lsst.pipe.base.connectionTypes.Input(
         doc="Input warped template to subtract.",
         dimensions=("instrument", "visit", "detector"),
         storageClass="ExposureF",
-        name="{fakesType}{coaddName}Diff_templateExp"
+        name="{fakesType}{coaddName}Diff_templateExp",
     )
     science = lsst.pipe.base.connectionTypes.Input(
         doc="Input science exposure to subtract from.",
         dimensions=("instrument", "visit", "detector"),
         storageClass="ExposureF",
-        name="{fakesType}calexp"
+        name="{fakesType}calexp",
     )
     difference = lsst.pipe.base.connectionTypes.Input(
         doc="Result of subtracting convolved template from science image.",
@@ -70,7 +72,7 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
     # Outputs
     classifications = lsst.pipe.base.connectionTypes.Output(
         doc="Catalog of real/bogus classifications for each diaSource, "
-            "element-wise aligned with diaSources.",
+        "element-wise aligned with diaSources.",
         dimensions=("instrument", "visit", "detector"),
         storageClass="Catalog",
         name="{fakesType}{coaddName}RealBogusSources",
@@ -82,20 +84,21 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
             del self.pretrainedModel
 
 
-class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections):
+class RBTransiNetConfig(
+    lsst.pipe.base.PipelineTaskConfig, pipelineConnections=RBTransiNetConnections
+):
     modelPackageName = lsst.pex.config.Field(
-        optional=True,
-        dtype=str,
-        doc=("A unique identifier of a model package. ")
+        optional=True, dtype=str, doc=("A unique identifier of a model package. ")
     )
     modelPackageStorageMode = lsst.pex.config.ChoiceField(
         dtype=str,
         doc=("A string that indicates _where_ and _how_ the model package is stored."),
-        allowed={'local': 'packages stored in the meas_transiNet repository',
-                 'neighbor': 'packages stored in the rbClassifier_data repository',
-                 'butler': 'packages stored in the butler repository',
-                 },
-        default='neighbor',
+        allowed={
+            "local": "packages stored in the meas_transiNet repository",
+            "neighbor": "packages stored in the rbClassifier_data repository",
+            "butler": "packages stored in the butler repository",
+        },
+        default="neighbor",
     )
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
@@ -108,17 +111,20 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
         # a modelPackageName as a config field.
         if self.modelPackageStorageMode == "butler":
             if self.modelPackageName is not None:
-                raise ValueError("In a _real_ run of a pipeline when the "
-                                 "modelPackageStorageMode is 'butler', "
-                                 "the modelPackageName cannot be specified "
-                                 "as a config field. Pass it as a collection"
-                                 "name in the command-line instead.")
+                raise ValueError(
+                    "In a _real_ run of a pipeline when the "
+                    "modelPackageStorageMode is 'butler', "
+                    "the modelPackageName cannot be specified "
+                    "as a config field. Pass it as a collection"
+                    "name in the command-line instead."
+                )
 
 
 class RBTransiNetTask(lsst.pipe.base.PipelineTask):
     """Task for running TransiNet real/bogus classification on the output of
     the image subtraction pipeline.
     """
+
     _DefaultName = "rbTransiNet"
     ConfigClass = RBTransiNetConfig
 
@@ -129,17 +135,21 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
 
     @timeMethod
     def run(self, template, science, difference, diaSources, pretrainedModel=None):
-
         # Create the TransiNet interface object.
         # Note: assuming each quanta creates one instance of this task, this is
         # a proper place for doing this since loading of the model is run only
         # once. However, if in the future we come up with a design in which one
         # task instance is used for multiple quanta, this will need to be moved
         # somewhere else -- e.g. to the __init__ method, or even to runQuantum.
-        self.butler_loaded_package = pretrainedModel  # This will be used by the interface
+        self.butler_loaded_package = (
+            pretrainedModel  # This will be used by the interface
+        )
         self.interface = rbTransiNetInterface.RBTransiNetInterface(self)
 
-        cutouts = [self._make_cutouts(template, science, difference, source) for source in diaSources]
+        cutouts = [
+            self._make_cutouts(template, science, difference, source)
+            for source in diaSources
+        ]
         self.log.info("Extracted %d cutouts.", len(cutouts))
         scores = self.interface.infer(cutouts)
         self.log.info("Scored %d cutouts.", len(scores))
@@ -182,10 +192,14 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
             template_cutout = template.Factory(template, box).image.array
             difference_cutout = difference.Factory(difference, box).image.array
         else:
-            science_cutout = np.zeros((self.config.cutoutSize, self.config.cutoutSize), dtype=np.float32)
+            science_cutout = np.zeros(
+                (self.config.cutoutSize, self.config.cutoutSize), dtype=np.float32
+            )
             template_cutout = np.zeros_like(science_cutout)
             difference_cutout = np.zeros_like(science_cutout)
 
-        return rbTransiNetInterface.CutoutInputs(science=science_cutout,
-                                                 template=template_cutout,
-                                                 difference=difference_cutout)
+        return rbTransiNetInterface.CutoutInputs(
+            science=science_cutout,
+            template=template_cutout,
+            difference=difference_cutout,
+        )

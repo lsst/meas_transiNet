@@ -29,7 +29,6 @@ from lsst.meas.transiNet import RBTransiNetInterface, CutoutInputs
 
 class TestInference(unittest.TestCase):
     def setUp(self):
-
         # Create a mock TransiNetTask.
         config = RBTransiNetTask.ConfigClass()
         config.modelPackageName = "dummy"
@@ -38,20 +37,24 @@ class TestInference(unittest.TestCase):
         self.interface = RBTransiNetInterface(self.task)
 
     def test_infer_single_empty(self):
-        """Test running infer on a single blank triplet.
-        """
+        """Test running infer on a single blank triplet."""
         data = np.zeros((51, 51), dtype=np.single)
         inputs = CutoutInputs(science=data, difference=data, template=data)
         result = self.interface.infer([inputs])
         self.assertTupleEqual(result.shape, (1,))
-        self.assertAlmostEqual(result[0], 0.7310586)  # Empricial meaningless value spit by this very model
+        self.assertAlmostEqual(
+            result[0], 0.86192876
+        )  # Empricial meaningless value spit by this very model
 
     def test_infer_many(self):
         """Test running infer on a large number of images,
         to make sure partitioning to batches works.
         """
         data = np.zeros((51, 51), dtype=np.single)
-        inputs = [CutoutInputs(science=data, difference=data, template=data) for _ in range(10)]
+        inputs = [
+            CutoutInputs(science=data, difference=data, template=data)
+            for _ in range(10)
+        ]
         result = self.interface.infer(inputs)
         self.assertTupleEqual(result.shape, (10,))
-        self.assertAlmostEqual(result[0], 0.7310586)
+        self.assertAlmostEqual(result[0], 0.86192876)

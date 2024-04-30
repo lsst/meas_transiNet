@@ -20,14 +20,14 @@ class StorageAdapterFactory:
     # specify a too customized storage mode -- to try to prevent
     # source injection attacks.
     storageAdapterClasses = {
-        'local': StorageAdapterLocal,
-        'neighbor': StorageAdapterNeighbor,
-        'butler': StorageAdapterButler,
+        "local": StorageAdapterLocal,
+        "neighbor": StorageAdapterNeighbor,
+        "butler": StorageAdapterButler,
     }
 
     @classmethod
     def create(cls, modelPackageName, storageMode, **kwargs):
-        """ Factory method to create a storage adapter
+        """Factory method to create a storage adapter
         based on the storageMode parameter.
 
         Parameters
@@ -50,11 +50,13 @@ class StorageAdapterFactory:
         # Convert to lower case to make it case insensitive.
         storageMode = storageMode.lower()
         if storageMode not in cls.storageAdapterClasses:
-            raise ValueError('Invalid storage mode: ' + storageMode)
+            raise ValueError("Invalid storage mode: " + storageMode)
 
         # Drop any None-valued kwargs.
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
         # Create and return the storage adapter.
-        storageAdapter = cls.storageAdapterClasses[storageMode](modelPackageName, **kwargs)
+        storageAdapter = cls.storageAdapterClasses[storageMode](
+            modelPackageName, **kwargs
+        )
         return storageAdapter

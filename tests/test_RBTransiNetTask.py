@@ -34,10 +34,10 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
     def create_sample_datasets(self):
         bbox = Box2I(Point2I(0, 0), Point2I(400, 400))
         dataset = lsst.meas.base.tests.TestDataset(bbox)
-        dataset.addSource(5000, Point2D(50, 50.))
+        dataset.addSource(5000, Point2D(50, 50.0))
         # TODO: make one of these centered in a different corner of the pixel,
         # to test that the cutout is properly centered.
-        dataset.addSource(10000, Point2D(100, 50.))
+        dataset.addSource(10000, Point2D(100, 50.0))
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
 
@@ -52,7 +52,9 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
     def test_make_cutouts(self):
         task = RBTransiNetTask(config=self.config)
         for record in self.catalog:
-            result = task._make_cutouts(self.exposure, self.exposure, self.exposure, record)
+            result = task._make_cutouts(
+                self.exposure, self.exposure, self.exposure, record
+            )
             self._check_cutout(result.science, task.config.cutoutSize)
             self._check_cutout(result.template, task.config.cutoutSize)
             self._check_cutout(result.difference, task.config.cutoutSize)
@@ -84,7 +86,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         # TODO: I'm not comfortable with this particular test: the exact
         # position of the max pixel depends on where in that pixel the
         # centroid is. We can assume Box2I.makeCenteredBox works correctly...
-        self.assertEqual(max_index, ((size/2)-1, (size/2)-1))
+        self.assertEqual(max_index, ((size / 2) - 1, (size / 2) - 1))
 
     def _check_empty_cutout(self, cutout):
         """Test that the cutout is empty.
@@ -97,8 +99,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         np.testing.assert_array_equal(cutout, np.zeros_like(cutout))
 
     def test_run(self):
-        """Test that run passes an appropriate object to the interface.
-        """
+        """Test that run passes an appropriate object to the interface."""
         task = RBTransiNetTask(config=self.config)
         result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
         self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)

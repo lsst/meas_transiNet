@@ -12,7 +12,7 @@ __all__ = ["StorageAdapterButler"]
 
 
 class StorageAdapterButler(StorageAdapterBase):
-    """ An adapter for interfacing with butler model packages.
+    """An adapter for interfacing with butler model packages.
 
     In this mode, all components of a model package are stored in the
     a Butler repository.
@@ -33,8 +33,8 @@ class StorageAdapterButler(StorageAdapterBase):
         It is only set when we are in the "online" mode of functionality.
     """
 
-    dataset_type_name = 'pretrainedModelPackage'
-    packages_parent_collection = 'pretrained_models'
+    dataset_type_name = "pretrainedModelPackage"
+    packages_parent_collection = "pretrained_models"
 
     def __init__(self, model_package_name, butler=None, butler_loaded_package=None):
         super().__init__(model_package_name)
@@ -46,7 +46,7 @@ class StorageAdapterButler(StorageAdapterBase):
 
         # butler and butler_loaded_package are mutually exclusive.
         if butler is not None and butler_loaded_package is not None:
-            raise ValueError('butler and butler_loaded_package are mutually exclusive')
+            raise ValueError("butler and butler_loaded_package are mutually exclusive")
 
         # Use the butler_loaded_package if it is provided.
         if butler_loaded_package is not None:
@@ -71,7 +71,7 @@ class StorageAdapterButler(StorageAdapterBase):
 
         instance = cls(model_package_name=use_name or other.model_package_name)
 
-        if hasattr(other, 'model_file'):
+        if hasattr(other, "model_file"):
             instance.model_file = other.model_file
             instance.checkpoint_file = other.checkpoint_file
             instance.metadata_file = other.metadata_file
@@ -97,11 +97,11 @@ class StorageAdapterButler(StorageAdapterBase):
 
         """
         with zipfile.ZipFile(payload.bytes, mode="r") as zf:
-            with zf.open('checkpoint') as f:
+            with zf.open("checkpoint") as f:
                 self.checkpoint_file = io.BytesIO(f.read())
-            with zf.open('architecture') as f:
+            with zf.open("architecture") as f:
                 self.model_file = io.BytesIO(f.read())
-            with zf.open('metadata') as f:
+            with zf.open("metadata") as f:
                 self.metadata_file = io.BytesIO(f.read())
 
     def to_payload(self):
@@ -116,10 +116,12 @@ class StorageAdapterButler(StorageAdapterBase):
 
         payload = NNModelPackagePayload()
 
-        with zipfile.ZipFile(payload.bytes, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr('checkpoint', self.checkpoint_file.read())
-            zf.writestr('architecture', self.model_file.read())
-            zf.writestr('metadata', self.metadata_file.read())
+        with zipfile.ZipFile(
+            payload.bytes, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as zf:
+            zf.writestr("checkpoint", self.checkpoint_file.read())
+            zf.writestr("architecture", self.model_file.read())
+            zf.writestr("metadata", self.metadata_file.read())
 
         return payload
 
@@ -137,11 +139,15 @@ class StorageAdapterButler(StorageAdapterBase):
 
         # Fetching needs a butler object.
         if self.butler is None:
-            raise ValueError('The `butler` object is required for fetching the model package')
+            raise ValueError(
+                "The `butler` object is required for fetching the model package"
+            )
 
         # Fetch the model package from the butler repository.
-        results = self.butler.registry.queryDatasets(StorageAdapterButler.dataset_type_name,
-                                                     collections=f'{StorageAdapterButler.packages_parent_collection}/{self.model_package_name}')  # noqa: E501
+        results = self.butler.registry.queryDatasets(
+            StorageAdapterButler.dataset_type_name,
+            collections=f"{StorageAdapterButler.packages_parent_collection}/{self.model_package_name}",
+        )  # noqa: E501
         payload = self.butler.get(list(results)[0])
         self.from_payload(payload)
 
@@ -192,8 +198,8 @@ class StorageAdapterButler(StorageAdapterBase):
         --------
         load_arch
         """
-        if device != 'cpu':
-            raise RuntimeError('storageAdapterButler only supports loading on CPU')
+        if device != "cpu":
+            raise RuntimeError("storageAdapterButler only supports loading on CPU")
         network_data = torch.load(self.checkpoint_file, map_location=device)
         return network_data
 
@@ -227,7 +233,7 @@ class StorageAdapterButler(StorageAdapterBase):
 
         # Check if the input model package is of a proper type.
         if model_package.adapter is StorageAdapterButler:
-            raise ValueError('The input model package cannot be of the butler type')
+            raise ValueError("The input model package cannot be of the butler type")
 
         # Choose the name of the model package to be ingested.
         if model_package_name is None:
@@ -241,10 +247,12 @@ class StorageAdapterButler(StorageAdapterBase):
 
         # Create the dataset type (and register it, just in case).
         data_id = {}
-        dataset_type = DatasetType(StorageAdapterButler.dataset_type_name,
-                                   dimensions=[],
-                                   storageClass="NNModelPackagePayload",
-                                   universe=butler.registry.dimensions)
+        dataset_type = DatasetType(
+            StorageAdapterButler.dataset_type_name,
+            dimensions=[],
+            storageClass="NNModelPackagePayload",
+            universe=butler.registry.dimensions,
+        )
 
         # Register the dataset type.
         def register_dataset_type(butler, dataset_type_name, dataset_type):
@@ -252,11 +260,11 @@ class StorageAdapterButler(StorageAdapterBase):
                 butler.registry.getDatasetType(dataset_type_name)
             except KeyError:
                 butler.registry.registerDatasetType(dataset_type)
-        register_dataset_type(butler, StorageAdapterButler.dataset_type_name, dataset_type)
+
+        register_dataset_type(
+            butler, StorageAdapterButler.dataset_type_name, dataset_type
+        )
 
         # Create an instance of StorageAdapterButler, and ingest its payload.
         payload = StorageAdapterButler.from_other(model_package.adapter).to_payload()
-        butler.put(payload,
-                   dataset_type,
-                   data_id,
-                   run=run_collection)
+        butler.put(payload, dataset_type, data_id, run=run_collection)

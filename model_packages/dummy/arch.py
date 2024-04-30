@@ -3,6 +3,7 @@ __all__ = ["VGG6"]
 import torch
 import torch.nn as nn
 
+
 class VGG6(nn.Module):
     def __init__(self, input_shape=(3, 51, 51), n_classes=1):
         super(VGG6, self).__init__()

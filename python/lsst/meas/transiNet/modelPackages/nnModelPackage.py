@@ -39,7 +39,10 @@ class NNModelPackage:
 
     def __init__(self, model_package_name, package_storage_mode, **kwargs):
         # Validate passed arguments.
-        if package_storage_mode not in StorageAdapterFactory.storageAdapterClasses.keys():
+        if (
+            package_storage_mode
+            not in StorageAdapterFactory.storageAdapterClasses.keys()
+        ):
             raise ValueError("Unsupported storage mode: %s" % package_storage_mode)
         if None in (model_package_name, package_storage_mode):
             raise ValueError("None is not a valid argument")
@@ -47,9 +50,9 @@ class NNModelPackage:
         self.model_package_name = model_package_name
         self.package_storage_mode = package_storage_mode
 
-        self.adapter = StorageAdapterFactory.create(self.model_package_name,
-                                                    self.package_storage_mode,
-                                                    **kwargs)
+        self.adapter = StorageAdapterFactory.create(
+            self.model_package_name, self.package_storage_mode, **kwargs
+        )
 
         self.metadata = self.adapter.load_metadata()
 
@@ -72,27 +75,29 @@ class NNModelPackage:
         """
 
         # Check if the specified device is valid.
-        if device not in ['cpu'] + ['cuda:%d' % i for i in range(torch.cuda.device_count())]:
+        if device not in ["cpu"] + [
+            "cuda:%d" % i for i in range(torch.cuda.device_count())
+        ]:
             raise ValueError("Invalid device: %s" % device)
 
         # Load various components.
         # Note that because of the way the StorageAdapterButler works,
         # the model architecture and the pretrained weights are loaded
         # into the cpu memory, and only then moved to the target device.
-        model = self.adapter.load_arch(device='cpu')
-        network_data = self.adapter.load_weights(device='cpu')
+        model = self.adapter.load_arch(device="cpu")
+        network_data = self.adapter.load_weights(device="cpu")
 
         # Load pretrained weights into model
         model.load_state_dict(network_data, strict=True)
 
         # Move model to the specified device, if it is not already there.
-        if device != 'cpu':
+        if device != "cpu":
             model = model.to(device)
 
         return model
 
     def get_model_input_shape(self):
-        """ Return the input shape of the model.
+        """Return the input shape of the model.
 
         Returns
         -------
@@ -105,7 +110,7 @@ class NNModelPackage:
         KeyError
             If the input shape is not found in the metadata.
         """
-        return tuple(self.metadata['input_shape'])
+        return tuple(self.metadata["input_shape"])
 
     def get_input_scale_factors(self):
         """
@@ -121,7 +126,7 @@ class NNModelPackage:
         KeyError
             If the scale factors are not found in the metadata.
         """
-        return tuple(self.metadata['input_scale_factor'])
+        return tuple(self.metadata["input_scale_factor"])
 
     def get_boost_factor(self):
         """
@@ -141,4 +146,4 @@ class NNModelPackage:
         KeyError
             If the boost factor is not found in the metadata.
         """
-        return self.metadata['boost_factor']
+        return self.metadata["boost_factor"]

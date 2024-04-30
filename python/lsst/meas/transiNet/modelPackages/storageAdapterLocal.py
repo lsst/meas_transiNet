@@ -13,11 +13,16 @@ class StorageAdapterLocal(StorageAdapterBase):
     Local mode means both the code and pretrained weights reside in
     the same repository as that of rbTransiNetInterface.
     """
+
     def __init__(self, model_package_name):
         super().__init__(model_package_name)
 
         self.fetch()
-        self.model_filename, self.checkpoint_filename, self.metadata_filename = self.get_filenames()
+        (
+            self.model_filename,
+            self.checkpoint_filename,
+            self.metadata_filename,
+        ) = self.get_filenames()
 
     @staticmethod
     def get_base_path():
@@ -31,11 +36,13 @@ class StorageAdapterLocal(StorageAdapterBase):
 
         """
         try:
-            base_path = os.environ['MEAS_TRANSINET_DIR']
+            base_path = os.environ["MEAS_TRANSINET_DIR"]
         except KeyError:
-            raise RuntimeError("The environment variable MEAS_TRANSINET_DIR is not set.")
+            raise RuntimeError(
+                "The environment variable MEAS_TRANSINET_DIR is not set."
+            )
 
-        return os.path.join(base_path, 'model_packages')
+        return os.path.join(base_path, "model_packages")
 
     def get_filenames(self):
         """
@@ -53,8 +60,7 @@ class StorageAdapterLocal(StorageAdapterBase):
         FileNotFoundError
             If the model package is not found.
         """
-        dir_name = os.path.join(self.get_base_path(),
-                                self.model_package_name)
+        dir_name = os.path.join(self.get_base_path(), self.model_package_name)
 
         # We do not assume default file names in case of the 'local' mode.
         # For now we rely on a hacky pattern matching approach:
@@ -62,21 +68,29 @@ class StorageAdapterLocal(StorageAdapterBase):
         # There should be one and only one file named *.pth.tar under the dir.
         # There should be one and only one file named meta*.yaml under the dir.
         try:
-            model_filenames = glob.glob(f'{dir_name}/arch*.py')
-            checkpoint_filenames = glob.glob(f'{dir_name}/*.pt')
-            metadata_filenames = glob.glob(f'{dir_name}/meta*.yaml')
+            model_filenames = glob.glob(f"{dir_name}/arch*.py")
+            checkpoint_filenames = glob.glob(f"{dir_name}/*.pt")
+            metadata_filenames = glob.glob(f"{dir_name}/meta*.yaml")
         except IndexError:
-            raise FileNotFoundError("Cannot find model architecture, checkpoint or metadata file.")
+            raise FileNotFoundError(
+                "Cannot find model architecture, checkpoint or metadata file."
+            )
 
         # Check that there's only one file for each of the three categories.
         if len(model_filenames) != 1:
-            raise RuntimeError(f"Found {len(model_filenames)} model files, "
-                               f"expected 1 in {dir_name}.")
+            raise RuntimeError(
+                f"Found {len(model_filenames)} model files, "
+                f"expected 1 in {dir_name}."
+            )
         if len(checkpoint_filenames) != 1:
-            raise RuntimeError(f"Found {len(checkpoint_filenames)} checkpoint files, "
-                               f"expected 1 in {dir_name}.")
+            raise RuntimeError(
+                f"Found {len(checkpoint_filenames)} checkpoint files, "
+                f"expected 1 in {dir_name}."
+            )
         if len(metadata_filenames) != 1:
-            raise RuntimeError(f"Found {len(metadata_filenames)} metadata files, "
-                               f"expected 1 in {dir_name}.")
+            raise RuntimeError(
+                f"Found {len(metadata_filenames)} metadata files, "
+                f"expected 1 in {dir_name}."
+            )
 
         return model_filenames[0], checkpoint_filenames[0], metadata_filenames[0]

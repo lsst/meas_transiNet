@@ -28,7 +28,7 @@ import importlib.util
 import torch.nn
 
 
-def load_module_from_memory(file_like_object, name='model'):
+def load_module_from_memory(file_like_object, name="model"):
     """Load a module from the specified file-like object.
 
     Parameters
@@ -54,7 +54,7 @@ def load_module_from_memory(file_like_object, name='model'):
 
         def get_filename(self, fullname):
             # This method is required but the filename is not important here
-            return '<in-memory>'
+            return "<in-memory>"
 
     content = file_like_object.getvalue()
     loader = InMemoryLoader(content)
@@ -65,7 +65,7 @@ def load_module_from_memory(file_like_object, name='model'):
     return module
 
 
-def load_module_from_file(path, name='model'):
+def load_module_from_file(path, name="model"):
     """Load a module from the specified path and return the module object.
 
     Parameters
@@ -104,7 +104,9 @@ def import_model_from_module(module):
 
     model = getattr(module, module.__all__[0])
     if torch.nn.Module not in model.__bases__:
-        raise ImportError(f"Loaded class {model}, from {module}, is not a pytorch neural network module.")
+        raise ImportError(
+            f"Loaded class {model}, from {module}, is not a pytorch neural network module."
+        )
     return model((3, 51, 51))
 
 

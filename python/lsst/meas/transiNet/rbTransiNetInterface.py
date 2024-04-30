@@ -33,6 +33,7 @@ class CutoutInputs:
     """Science/template/difference cutouts of a single object plus other
     metadata.
     """
+
     science: np.ndarray
     template: np.ndarray
     difference: np.ndarray
@@ -42,7 +43,7 @@ class CutoutInputs:
 
 
 class RBTransiNetInterface:
-    """ The interface between the LSST AP pipeline and a trained pytorch-based
+    """The interface between the LSST AP pipeline and a trained pytorch-based
     RBTransiNet neural network model.
 
     Parameters
@@ -57,27 +58,33 @@ class RBTransiNetInterface:
         Device to load and run the neural network on, e.g. 'cpu' or 'cuda:0'
     """
 
-    def __init__(self, task, device='cpu'):
+    def __init__(self, task, device="cpu"):
         self.task = task
 
         # in case the model package name is not set at this stage, it is not
         # needed (e.g. in butler mode).
-        self.model_package_name = task.config.modelPackageName or 'N/A'
+        self.model_package_name = task.config.modelPackageName or "N/A"
 
         self.package_storage_mode = task.config.modelPackageStorageMode
         self.device = device
         self.init_model()
 
     def init_model(self):
-        """Create and initialize an NN model
-        """
-        if self.package_storage_mode == 'butler' and self.task.butler_loaded_package is None:
-            raise RuntimeError("RBTransiNetInterface is trying to load a butler-mode NN model package, "
-                               "but the RBTransiNetTask has not passed down a preloaded payload.")
+        """Create and initialize an NN model"""
+        if (
+            self.package_storage_mode == "butler"
+            and self.task.butler_loaded_package is None
+        ):
+            raise RuntimeError(
+                "RBTransiNetInterface is trying to load a butler-mode NN model package, "
+                "but the RBTransiNetTask has not passed down a preloaded payload."
+            )
 
-        model_package = NNModelPackage(model_package_name=self.model_package_name,
-                                       package_storage_mode=self.package_storage_mode,
-                                       butler_loaded_package=self.task.butler_loaded_package)
+        model_package = NNModelPackage(
+            model_package_name=self.model_package_name,
+            package_storage_mode=self.package_storage_mode,
+            butler_loaded_package=self.task.butler_loaded_package,
+        )
         self.model = model_package.load(self.device)
 
         # Put the model in evaluation mode instead of training model.
@@ -97,7 +104,7 @@ class RBTransiNetInterface:
             Generator of batches of inputs.
         """
         for i in range(0, len(inputs), batchSize):
-            yield inputs[i:i + batchSize]
+            yield inputs[i: i + batchSize]
 
     def prepare_input(self, inputs):
         """Convert inputs from numpy arrays, etc. to a torch.tensor blob.
@@ -119,14 +126,14 @@ class RBTransiNetInterface:
         difference_tensors = []
 
         labels_list = []
-        
+
         for inp in inputs:
             # Convert each cutout to a torch tensor
             template_tensors.append(torch.from_numpy(inp.template))
             science_tensors.append(torch.from_numpy(inp.science))
             difference_tensors.append(torch.from_numpy(inp.difference))
             labels_list.append(inp.label)  # Assuming label is same for all three images
-        
+
         template_tensors = torch.stack(template_tensors).unsqueeze(1)
         science_tensors = torch.stack(science_tensors).unsqueeze(1)
         difference_tensors = torch.stack(difference_tensors).unsqueeze(1)

@@ -88,6 +88,6 @@ class StorageAdapterBase(object):
         metadata : `dict`
             Dictionary containing the metadata associated with the model.
         """
-        with open(self.metadata_filename, 'r') as f:
+        with open(self.metadata_filename, "r") as f:
             metadata = yaml.safe_load(f)
         return metadata
