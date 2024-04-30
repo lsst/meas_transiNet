@@ -42,7 +42,7 @@ def sanity_check_dummy_model(test, model):
     weights = next(model.parameters())
 
     # Test shape of loaded weights.
-    test.assertTupleEqual(weights.shape, (64, 1, 7, 7))
+    test.assertTupleEqual(weights.shape, (16, 3, 3, 3))
 
     # Test weight values.
     # Only test a single tensor, as the probability of randomly having

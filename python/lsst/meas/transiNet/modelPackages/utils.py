@@ -105,7 +105,7 @@ def import_model_from_module(module):
     model = getattr(module, module.__all__[0])
     if torch.nn.Module not in model.__bases__:
         raise ImportError(f"Loaded class {model}, from {module}, is not a pytorch neural network module.")
-    return model((51, 51))
+    return model((3, 51, 51))
 
 
 def import_model(path):

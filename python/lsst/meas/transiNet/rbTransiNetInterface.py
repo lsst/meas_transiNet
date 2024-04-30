@@ -114,24 +114,6 @@ class RBTransiNetInterface:
         labels
             Truth labels, concatenated into a single list.
         """
-        # cutoutsList = []
-        # labelsList = []
-        # for inp in inputs:
-        #     # Convert each cutout to a torch tensor
-        #     template = torch.from_numpy(inp.template)
-        #     science = torch.from_numpy(inp.science)
-        #     difference = torch.from_numpy(inp.difference)
-
-        #     # Stack the components to create a single blob
-        #     singleBlob = torch.stack((template, science, difference), dim=0)
-
-        #     # And append them to the temporary list
-        #     cutoutsList.append(singleBlob)
-
-        #     labelsList.append(inp.label)
-
-        # blob = torch.stack(cutoutsList)
-        # return blob, labelsList
         template_tensors = []
         science_tensors = []
         difference_tensors = []
@@ -177,7 +159,7 @@ class RBTransiNetInterface:
             with torch.no_grad():
                 output_ = self.model(torchBlob[0], torchBlob[1], torchBlob[2])
             output = torch.sigmoid(output_)
-
+            print(output)
             # And append the results to the list
             if i == 0:
                 scores = output
