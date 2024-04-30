@@ -245,7 +245,7 @@ class TestModelPackageNeighbor(unittest.TestCase):
 
         # Test whether the metadata-related methods return the correct values
         # for the dummy model package.
-        self.assertEqual(model_package.get_model_input_shape(), (256, 256, 3))
+        self.assertEqual(model_package.get_model_input_shape(), (51, 51, 3))
         self.assertEqual(
             model_package.get_input_scale_factors(), (1.0, 0.0033333333333333335, 1.0)
         )
