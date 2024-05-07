@@ -129,8 +129,8 @@ class RBTransiNetInterface:
 
         for inp in inputs:
             # Convert each cutout to a torch tensor
-            template_tensors.append(torch.from_numpy(inp.template))
             science_tensors.append(torch.from_numpy(inp.science))
+            template_tensors.append(torch.from_numpy(inp.template))
             difference_tensors.append(torch.from_numpy(inp.difference))
             labels_list.append(inp.label)  # Assuming label is same for all three images
 
