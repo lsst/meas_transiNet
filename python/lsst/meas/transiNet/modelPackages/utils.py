@@ -107,7 +107,7 @@ def import_model_from_module(module):
         raise ImportError(
             f"Loaded class {model}, from {module}, is not a pytorch neural network module."
         )
-    return model((3, 51, 51))
+    return model()
 
 
 def import_model(path):

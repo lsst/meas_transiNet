@@ -96,7 +96,7 @@ class TestModelPackageLocal(unittest.TestCase):
                 f.write("import torch\n")
                 f.write("import torch.nn as nn\n")
                 f.write("class Net(nn.Module):\n")
-                f.write("    def __init__(self, img_size):\n")
+                f.write("    def __init__(self, img_size=(3,51,51)):\n")
                 f.write("        super(Net, self).__init__()\n")
                 f.write("        self.fc1 = nn.Linear(3, 16)\n")
                 f.write("    def forward(self, x):\n")

@@ -26,6 +26,9 @@ import lsst.pex.config
 import lsst.pipe.base
 from lsst.utils.timer import timeMethod
 import numpy as np
+# TODO: Remove this import after debugging
+# from PIL import Image
+# from random import randint
 
 from . import rbTransiNetInterface
 from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
@@ -197,6 +200,17 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
             )
             template_cutout = np.zeros_like(science_cutout)
             difference_cutout = np.zeros_like(science_cutout)
+        # TODO: Remove this code after debugging
+        # Code to save cutouts for debugging purposes
+        # rand_int = randint(0, 100000)
+        # path = "/home/ghost/Desktop/Rubin/meas_transiNet/cutouts"
+        # print(science_cutout.shape)
+        # Image.fromarray(science_cutout).convert("L")\
+        #     .save(f"{path}/science_cutout_{rand_int}.png", mode="L")
+        # Image.fromarray(template_cutout).convert("L")\
+        #     .save(f"{path}/template_cutout_{rand_int}.png", mode="L")
+        # Image.fromarray(difference_cutout).convert("L")\
+        #     .save(f"{path}/difference_cutout_{rand_int}.png", mode="L")
 
         return rbTransiNetInterface.CutoutInputs(
             science=science_cutout,
