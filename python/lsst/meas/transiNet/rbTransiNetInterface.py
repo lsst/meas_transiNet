@@ -148,6 +148,10 @@ class RBTransiNetInterface:
             Float scores for each element of ``inputs``.
         """
 
+        # Handle empty inputs gracefully.
+        if not inputs:
+            return np.array([])
+
         # Convert the inputs to batches.
         # TODO: The batch size is set to 64 for now. Later when
         # deploying parallel instances of the task, memory limits
