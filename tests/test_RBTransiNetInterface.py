@@ -49,8 +49,8 @@ class TestInference(unittest.TestCase):
         """Test running infer on a single blank triplet.
         """
         data = np.zeros((256, 256), dtype=np.single)
-        inputs = CutoutInputs(science=data, difference=data, template=data)
-        result = self.interface.infer([inputs])
+        inputs = [CutoutInputs(science=data, difference=data, template=data)]
+        result = self.interface.infer(inputs)
         self.assertTupleEqual(result.shape, (1,))
         self.assertAlmostEqual(result[0], 0.5011908)  # Empricial meaningless value spit by this very model
 
