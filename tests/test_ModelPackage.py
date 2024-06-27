@@ -182,7 +182,7 @@ class TestModelPackageNeighbor(unittest.TestCase):
 
     def tearDown(self):
         # Remove the neighbor-mode dummy model package
-        shutil.rmtree(self.temp_package_dir)
+        shutil.rmtree(self.temp_package_dir, ignore_errors=True)
 
     def test_load(self):
         """Test loading of a model package of neighbor mode
@@ -244,7 +244,7 @@ class TestModelPackageButler(unittest.TestCase):
         self.butler = Butler(self.repo_root, writeable=True)
 
     def tearDown(self):
-        shutil.rmtree(self.repo_root)
+        shutil.rmtree(self.repo_root, ignore_errors=True)
 
     def ingest(self):
         # Load a local model package, to transfer/ingest to
