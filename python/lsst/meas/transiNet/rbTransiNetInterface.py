@@ -21,8 +21,9 @@
 
 __all__ = ["RBTransiNetInterface", "CutoutInputs"]
 
-import numpy as np
 import dataclasses
+
+import numpy as np
 import torch
 
 from .modelPackages.nnModelPackage import NNModelPackage
