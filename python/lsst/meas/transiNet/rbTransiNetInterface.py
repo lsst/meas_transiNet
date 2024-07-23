@@ -21,9 +21,13 @@
 
 __all__ = ["RBTransiNetInterface", "CutoutInputs"]
 
-import numpy as np
 import dataclasses
+import math
+
+import numpy as np
 import torch
+
+import lsst.utils.logging
 
 from .modelPackages.nnModelPackage import NNModelPackage
 
@@ -156,10 +160,16 @@ class RBTransiNetInterface:
         # TODO: The batch size is set to 64 for now. Later when
         # deploying parallel instances of the task, memory limits
         # should be taken into account, if necessary.
-        batches = self.input_to_batches(inputs, batchSize=64)
+        batch_size = 64
+        batches = self.input_to_batches(inputs, batchSize=batch_size)
+
+        # Log every 10 seconds as proof of liveness.
+        logger = lsst.utils.logging.PeriodicLogger(self.task.log, interval=10.0)
+        n_batches = math.ceil(len(inputs) / batch_size)
 
         # Loop over the batches
         for i, batch in enumerate(batches):
+            logger.log("%s/%s batches have been scored.", i, n_batches)
             torchBlob, labelsList = self.prepare_input(batch)
 
             # Run the model
