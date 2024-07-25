@@ -1,5 +1,7 @@
-from lsst.daf.butler import Formatter
+from lsst.daf.butler import FormatterV2
+from lsst.resources import ResourcePath
 from io import BytesIO
+from typing import Any
 
 __all__ = ["NNModelPackageFormatter", "NNModelPackagePayload"]
 
@@ -13,18 +15,23 @@ class NNModelPackagePayload():
         self.bytes = BytesIO()
 
 
-class NNModelPackageFormatter(Formatter):
+class NNModelPackageFormatter(FormatterV2):
     """Formatter for NN model packages.
     """
-    extension = ".zip"
+    default_extension = ".zip"
+    can_read_from_uri = True
 
-    def read(self, component=None):
+    def read_from_uri(self, uri: ResourcePath, component: str | None = None, expected_size: int = -1) -> Any:
         """Read a dataset.
 
         Parameters
         ----------
-        component : `str`, optional
+        uri : `lsst.ResourcePath`
+            Location of the file to read.
+        component : `str` or `None`, optional
             Component to read from the file.
+        expected_size : `int`, optional
+            Expected size of the file.
 
         Returns
         -------
@@ -32,54 +39,8 @@ class NNModelPackageFormatter(Formatter):
             The requested data as a Python object.
         """
         payload = NNModelPackagePayload()
-        with open(self.fileDescriptor.location.path, "rb") as f:
-            payload.bytes = BytesIO(f.read())
+        payload.bytes = BytesIO(uri.read())
         return payload
 
-    def write(self, inMemoryDataset):
-        """Write a Dataset.
-
-        Parameters
-        ----------
-        inMemoryDataset : `object`
-            The Dataset to store.
-
-        """
-        with open(self.fileDescriptor.location.path, "wb") as f:
-            f.write(inMemoryDataset.bytes.getvalue())
-
-    def fromBytes(self, serializedDataset: bytes, component=None):
-        """Read serialized data into a Dataset or its component.
-
-        Parameters
-        ----------
-        serializedDataset : `bytes`
-            Bytes object to unserialize.
-        component : `str`, optional
-            Component to read from the Dataset. Only used if the `StorageClass`
-            for reading differed from the `StorageClass` used to write the
-            file.
-
-        Returns
-        -------
-        payload : `NNModelPackagePayload`
-            The requested data as a Python object.
-        """
-        payload = NNModelPackagePayload()
-        payload.bytes = BytesIO(serializedDataset)
-        return payload
-
-    def toBytes(self, inMemoryDataset):
-        """Serialize the Dataset to bytes based on formatter.
-
-        Parameters
-        ----------
-        inMemoryDataset : `object`
-            The Python object to serialize.
-
-        Returns
-        -------
-        serializedDataset : `bytes`
-            Bytes representing the serialized dataset.
-        """
-        return inMemoryDataset.bytes.getvalue()
+    def to_bytes(self, in_memory_dataset: Any) -> bytes:
+        return in_memory_dataset.bytes.getvalue()
