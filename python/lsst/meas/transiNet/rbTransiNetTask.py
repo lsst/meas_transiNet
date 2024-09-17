@@ -46,7 +46,7 @@ class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
         doc="Input science exposure to subtract from.",
         dimensions=("instrument", "visit", "detector"),
         storageClass="ExposureF",
-        name="{fakesType}calexp"
+        name="{fakesType}initial_pvi"
     )
     difference = lsst.pipe.base.connectionTypes.Input(
         doc="Result of subtracting convolved template from science image.",
