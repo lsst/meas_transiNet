@@ -128,9 +128,8 @@ class RBTransiNetInterface:
             difference = torch.from_numpy(inp.difference)
 
             # Stack the components to create a single blob
-            # dimensions should be 1 x width x (3 * height)
-            singleBlob = torch.stack([torch.cat([difference, science, template], 
-                                               dim=1)], dim=0)
+            # dimensions should be 3 x width x height
+            singleBlob = torch.stack([difference, science, template], dim=0)
 
             # And append them to the temporary list
             cutoutsList.append(singleBlob)
