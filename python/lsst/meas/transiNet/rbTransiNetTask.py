@@ -179,9 +179,9 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         box = lsst.geom.Box2I.makeCenteredBox(source.getCentroid(), extent)
 
         if science.getBBox().contains(box):
-            science_cutout = science.Factory(science, box).image.array
-            template_cutout = template.Factory(template, box).image.array
-            difference_cutout = difference.Factory(difference, box).image.array
+            science_cutout = np.nan_to_num(science.Factory(science, box).image.array)
+            template_cutout = np.nan_to_num(template.Factory(template, box).image.array)
+            difference_cutout = np.nan_to_num(difference.Factory(difference, box).image.array)
         else:
             science_cutout = np.zeros((self.config.cutoutSize, self.config.cutoutSize), dtype=np.float32)
             template_cutout = np.zeros_like(science_cutout)
