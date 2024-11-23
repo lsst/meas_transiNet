@@ -194,7 +194,8 @@ class StorageAdapterButler(StorageAdapterBase):
         """
         if device != 'cpu':
             raise RuntimeError('storageAdapterButler only supports loading on CPU')
-        network_data = torch.load(self.checkpoint_file, map_location=device)
+        network_data = torch.load(self.checkpoint_file, map_location=device,
+                                  weights_only=True)
         return network_data
 
     def load_metadata(self):

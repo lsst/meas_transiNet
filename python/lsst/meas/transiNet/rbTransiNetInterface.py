@@ -137,6 +137,7 @@ class RBTransiNetInterface:
             labelsList.append(inp.label)
 
         blob = torch.stack(cutoutsList)
+
         return blob, labelsList
 
     def infer(self, inputs):
@@ -175,8 +176,7 @@ class RBTransiNetInterface:
 
             # Run the model
             with torch.no_grad():
-                output_ = self.model(torchBlob)
-            output = torch.sigmoid(output_)
+                output = self.model(torchBlob)
 
             # And append the results to the list
             if i == 0:
