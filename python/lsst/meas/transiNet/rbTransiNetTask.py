@@ -101,7 +101,7 @@ class RBTransiNetConfig(lsst.pipe.base.PipelineTaskConfig, pipelineConnections=R
     cutoutSize = lsst.pex.config.Field(
         dtype=int,
         doc="Width/height of square cutouts to send to classifier.",
-        default=256,
+        default=51,
     )
 
     def validate(self):
