@@ -30,4 +30,4 @@ class TestModel(nn.Module):
         x = F.relu(x)
         x = self.dropout2(x)
         x = self.fc2(x)
-        return x
+        return F.sigmoid(x).squeeze(1)

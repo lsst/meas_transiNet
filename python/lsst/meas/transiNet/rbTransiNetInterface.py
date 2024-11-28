@@ -128,7 +128,8 @@ class RBTransiNetInterface:
             difference = torch.from_numpy(inp.difference)
 
             # Stack the components to create a single blob
-            singleBlob = torch.stack((template, science, difference), dim=0)
+            # dimensions should be 3 x width x height
+            singleBlob = torch.stack([difference, science, template], dim=0)
 
             # And append them to the temporary list
             cutoutsList.append(singleBlob)
@@ -136,6 +137,7 @@ class RBTransiNetInterface:
             labelsList.append(inp.label)
 
         blob = torch.stack(cutoutsList)
+
         return blob, labelsList
 
     def infer(self, inputs):
@@ -174,8 +176,7 @@ class RBTransiNetInterface:
 
             # Run the model
             with torch.no_grad():
-                output_ = self.model(torchBlob)
-            output = torch.sigmoid(output_)
+                output = self.model(torchBlob)
 
             # And append the results to the list
             if i == 0:

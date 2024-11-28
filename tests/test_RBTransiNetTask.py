@@ -48,6 +48,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         self.config = RBTransiNetTask.ConfigClass()
         self.config.modelPackageName = "dummy"
         self.config.modelPackageStorageMode = "local"
+        self.config.cutoutSize = 256
 
     def test_make_cutouts(self):
         task = RBTransiNetTask(config=self.config)

@@ -59,11 +59,11 @@ class StorageAdapterLocal(StorageAdapterBase):
         # We do not assume default file names in case of the 'local' mode.
         # For now we rely on a hacky pattern matching approach:
         # There should be one and only one file named arch*.py under the dir.
-        # There should be one and only one file named *.pth.tar under the dir.
+        # There should be one and only one file named *.pt under the dir.
         # There should be one and only one file named meta*.yaml under the dir.
         try:
             model_filenames = glob.glob(f'{dir_name}/arch*.py')
-            checkpoint_filenames = glob.glob(f'{dir_name}/*.pth.tar')
+            checkpoint_filenames = glob.glob(f'{dir_name}/*.pt')
             metadata_filenames = glob.glob(f'{dir_name}/meta*.yaml')
         except IndexError:
             raise FileNotFoundError("Cannot find model architecture, checkpoint or metadata file.")
