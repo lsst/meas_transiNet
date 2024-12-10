@@ -146,7 +146,7 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         self.log.info("Scored %d cutouts.", len(scores))
         schema = lsst.afw.table.Schema()
         schema.addField(diaSources.schema["id"].asField())
-        schema.addField("score", doc="real/bogus score of this source", type=float)
+        schema.addField("score", doc="real/bogus score of this source", type=np.float32)
         classifications = lsst.afw.table.BaseCatalog(schema)
         classifications.resize(len(scores))
 
