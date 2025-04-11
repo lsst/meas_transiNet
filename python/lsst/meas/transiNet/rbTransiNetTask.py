@@ -30,6 +30,9 @@ import numpy as np
 from . import rbTransiNetInterface
 from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapterButler
 
+from astropy.utils.iers import conf
+conf.auto_max_age = None
+
 
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
                              dimensions=("instrument", "visit", "detector"),
