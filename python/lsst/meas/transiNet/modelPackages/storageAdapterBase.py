@@ -2,6 +2,12 @@ from . import utils
 import torch
 import yaml
 
+# In the classifier's __init__ or model-loading method:
+# Prevent PyTorch from spawning threads based on the node's total CPU count,
+# which is misleading inside a Kubernetes pod with a small CPU limit.
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
+
 
 class StorageAdapterBase(object):
     """
