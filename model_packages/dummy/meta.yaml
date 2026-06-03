@@ -1,7 +1,7 @@
 # General information about the model stored in the package,
 # as well as important hyperparameters and settings, pertaining the model.
 
-version: 0.1
+version: 0.0
 description: A dummy model for testing purposes.
 
 # The model's hyperparameters and settings.
