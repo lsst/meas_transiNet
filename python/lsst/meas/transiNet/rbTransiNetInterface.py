@@ -84,6 +84,7 @@ class RBTransiNetInterface:
                                        package_storage_mode=self.package_storage_mode,
                                        butler_loaded_package=self.task.butler_loaded_package)
         self.model = model_package.load(self.device)
+        self.version = str(model_package.metadata['version'])
 
         # Put the model in evaluation mode instead of training model.
         self.model.eval()

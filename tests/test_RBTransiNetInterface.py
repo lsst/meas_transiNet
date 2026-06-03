@@ -37,6 +37,9 @@ class TestInference(unittest.TestCase):
         self.task = RBTransiNetTask(config=config)
         self.interface = RBTransiNetInterface(self.task)
 
+    def test_version(self):
+        self.assertEqual(self.interface.version, "0.0")
+
     def test_infer_empty_inputs(self):
         """Test running infer on empty inputs to make sure it handles it
         gracefully, i.e. returns an empty array for empty inputs.

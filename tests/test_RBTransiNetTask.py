@@ -104,6 +104,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
         self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
         np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
+        np.testing.assert_equal("0.0", result.classifications[0]["version"])
 
     def test_config_butlerblock(self):
         config = RBTransiNetTask.ConfigClass()

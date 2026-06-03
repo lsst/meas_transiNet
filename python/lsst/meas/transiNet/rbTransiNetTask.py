@@ -147,11 +147,14 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         schema = lsst.afw.table.Schema()
         schema.addField(diaSources.schema["id"].asField())
         schema.addField("score", doc="real/bogus score of this source", type=np.float32)
+        schema.addField("version", doc="Version of the reliability model", type=str, size=7)
         classifications = lsst.afw.table.BaseCatalog(schema)
         classifications.resize(len(scores))
 
         classifications["id"] = diaSources["id"]
         classifications["score"] = scores
+        for record in classifications:
+            record.set("version", self.interface.version)
 
         return lsst.pipe.base.Struct(classifications=classifications)
 
