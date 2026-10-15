@@ -22,6 +22,7 @@
 __all__ = ["RBTransiNetTask", "RBTransiNetConfig"]
 
 import lsst.geom
+from lsst.images import Box
 import lsst.pex.config
 import lsst.pipe.base
 from lsst.utils.timer import timeMethod
@@ -34,25 +35,27 @@ from lsst.meas.transiNet.modelPackages.storageAdapterButler import StorageAdapte
 class RBTransiNetConnections(lsst.pipe.base.PipelineTaskConnections,
                              dimensions=("instrument", "visit", "detector"),
                              defaultTemplates={"coaddName": "deep", "fakesType": ""}):
+    # The butler converts an afw image component to ``ImageV2``.
     # NOTE: Do we want the "ready to difference" template, or something
     # earlier? This one is warped, but not PSF-matched.
     template = lsst.pipe.base.connectionTypes.Input(
-        doc="Input warped template to subtract.",
+        doc="Image component of the input warped template to subtract.",
         dimensions=("instrument", "visit", "detector"),
-        storageClass="ExposureF",
-        name="{fakesType}{coaddName}Diff_templateExp"
+        storageClass="ImageV2",
+        name="{fakesType}{coaddName}Diff_templateExp.image"
     )
     science = lsst.pipe.base.connectionTypes.Input(
-        doc="Input science exposure to subtract from.",
+        doc="Image component of the input science exposure to subtract from.",
         dimensions=("instrument", "visit", "detector"),
-        storageClass="ExposureF",
-        name="{fakesType}calexp"
+        storageClass="ImageV2",
+        name="{fakesType}calexp.image"
     )
     difference = lsst.pipe.base.connectionTypes.Input(
-        doc="Result of subtracting convolved template from science image.",
+        doc="Image component of the result of subtracting the convolved template"
+            " from the science image.",
         dimensions=("instrument", "visit", "detector"),
-        storageClass="ExposureF",
-        name="{fakesType}{coaddName}Diff_differenceExp",
+        storageClass="ImageV2",
+        name="{fakesType}{coaddName}Diff_differenceExp.image",
     )
     diaSources = lsst.pipe.base.connectionTypes.Input(
         doc="Detected sources on the difference image.",
@@ -163,10 +166,10 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
 
         Parameters
         ----------
-        template : `lsst.afw.image.ExposureF`
-        science : `lsst.afw.image.ExposureF`
-        difference : `lsst.afw.image.ExposureF`
-            Exposures to cut images out of.
+        template : `lsst.images.Image`
+        science : `lsst.images.Image`
+        difference : `lsst.images.Image`
+            Images to cut out of.
         source : `lsst.afw.table.SourceRecord`
             Source to make cutouts of.
 
@@ -179,12 +182,12 @@ class RBTransiNetTask(lsst.pipe.base.PipelineTask):
         # Try to create cutouts, or simply return empty cutouts if
         # failed (most probably out-of-border box)
         extent = lsst.geom.Extent2I(self.config.cutoutSize)
-        box = lsst.geom.Box2I.makeCenteredBox(source.getCentroid(), extent)
+        box = Box.from_legacy(lsst.geom.Box2I.makeCenteredBox(source.getCentroid(), extent))
 
-        if science.getBBox().contains(box):
-            science_cutout = np.nan_to_num(science.Factory(science, box).image.array)
-            template_cutout = np.nan_to_num(template.Factory(template, box).image.array)
-            difference_cutout = np.nan_to_num(difference.Factory(difference, box).image.array)
+        if science.bbox.contains(box):
+            science_cutout = np.nan_to_num(science[box].array)
+            template_cutout = np.nan_to_num(template[box].array)
+            difference_cutout = np.nan_to_num(difference[box].array)
         else:
             science_cutout = np.zeros((self.config.cutoutSize, self.config.cutoutSize), dtype=np.float32)
             template_cutout = np.zeros_like(science_cutout)
