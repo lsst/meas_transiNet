@@ -23,7 +23,8 @@ import unittest
 import numpy as np
 
 import lsst.afw.table
-from lsst.geom import Point2I, Point2D, Box2I
+from lsst.geom import Extent2I, Point2I, Point2D, Box2I
+from lsst.images import Image
 import lsst.meas.base.tests
 import lsst.utils.tests
 
@@ -40,6 +41,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         dataset.addSource(10000, Point2D(100, 50.))
         dataset.addSource(20000, Point2D(1, 1))  # close-to-border source
         self.exposure, self.catalog = dataset.realize(10.0, dataset.makeMinimalSchema())
+        self.image = Image.from_legacy(self.exposure.image)
 
     def setUp(self):
         self.create_sample_datasets()
@@ -53,7 +55,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
     def test_make_cutouts(self):
         task = RBTransiNetTask(config=self.config)
         for record in self.catalog:
-            result = task._make_cutouts(self.exposure, self.exposure, self.exposure, record)
+            result = task._make_cutouts(self.image, self.image, self.image, record)
             self._check_cutout(result.science, task.config.cutoutSize)
             self._check_cutout(result.template, task.config.cutoutSize)
             self._check_cutout(result.difference, task.config.cutoutSize)
@@ -62,6 +64,42 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
                 self._check_empty_cutout(result.science)
                 self._check_empty_cutout(result.template)
                 self._check_empty_cutout(result.difference)
+
+    def test_cutout_pixels(self):
+        """Test that a cutout holds the pixels of an afw cutout of the same
+        box.
+        """
+        self.config.cutoutSize = 51
+        task = RBTransiNetTask(config=self.config)
+        record = self.catalog[0]
+        box = Box2I.makeCenteredBox(record.getCentroid(), Extent2I(self.config.cutoutSize))
+        science = self.exposure.image
+        template = self.exposure.image.clone()
+        template *= 2.
+        difference = self.exposure.image.clone()
+        difference *= 3.
+        scienceCutout = self.exposure.image.Factory(science, box).array
+        templateCutout = self.exposure.image.Factory(template, box).array
+        differenceCutout = self.exposure.image.Factory(difference, box).array
+        result = task._make_cutouts(Image.from_legacy(template),
+                                    Image.from_legacy(science),
+                                    Image.from_legacy(difference),
+                                    record)
+        np.testing.assert_array_equal(result.science, scienceCutout)
+        np.testing.assert_array_equal(result.template, templateCutout)
+        np.testing.assert_array_equal(result.difference, differenceCutout)
+
+    def test_connections(self):
+        """Test that the image inputs read the image component as
+        ``ImageV2``.
+        """
+        config = RBTransiNetTask.ConfigClass()
+        connections = config.connections.ConnectionsClass(config=config)
+        self.assertEqual(connections.science.name, "calexp.image")
+        self.assertEqual(connections.template.name, "deepDiff_templateExp.image")
+        self.assertEqual(connections.difference.name, "deepDiff_differenceExp.image")
+        for name in ("science", "template", "difference"):
+            self.assertEqual(getattr(connections, name).storageClass, "ImageV2")
 
     def _check_cutout(self, image, size):
         """Test that the image cutout was made correctly.
@@ -101,7 +139,7 @@ class TestRBTransiNetTask(lsst.utils.tests.TestCase):
         """Test that run passes an appropriate object to the interface.
         """
         task = RBTransiNetTask(config=self.config)
-        result = task.run(self.exposure, self.exposure, self.exposure, self.catalog)
+        result = task.run(self.image, self.image, self.image, self.catalog)
         self.assertIsInstance(result.classifications, lsst.afw.table.BaseCatalog)
         np.testing.assert_array_equal(self.catalog["id"], result.classifications["id"])
         np.testing.assert_equal("0.0", result.classifications[0]["version"])
